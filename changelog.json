@@ -1,6 +1,21 @@
 {
-  "version": "2.0.1",
+  "version": "2.0.2",
   "entries": [
+    {
+      "version": "2.0.2",
+      "date": "27 July 2026",
+      "title": "Fling that actually throws people",
+      "notes": [
+        "Fling is rebuilt on the method from Universal Hub MAIN. It goes to them and drives your root through their head on alternating offsets, every frame, carrying a velocity the solver can only resolve by launching somebody. The old one spun you in place and hoped they walked into it.",
+        "!fling all works. Fling was never registered as a command that takes a crowd, so the token fell through to a name lookup and answered 'no one matched all' -- while the tips screen advertised it.",
+        "You come back. Each throw records where you were standing and returns you there before the next target, so a fling all does not end after one person with you out past the skybox. Stopping mid-throw puts you down too.",
+        "A bare !fling still means stand still and fling whoever touches you, which is the only thing the old one was ever good for. Give it a name or 'all' to go and get them.",
+        "The kill plane and the seated state are put back on stop, on !stopall, and on unload -- a fling interrupted halfway used to leave the whole game with no kill plane and no UI left to fix it.",
+        "Finding nothing is an answer, not a row: a sad face and 'Nothing found' centred in the drawer, at a size you can read, for a misspelt command as well as an empty search.",
+        "Scripts already running are greyed in the command bar with a badge, so you can see it before you press rather than after the bar has closed.",
+        "Picking a script no longer also runs what you typed as a command."
+      ]
+    },
     {
       "version": "2.0.1",
       "date": "27 July 2026",
