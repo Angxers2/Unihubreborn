@@ -17,7 +17,8 @@
         "The camera's field of view is restored to whatever the game had, not a hardcoded 70.",
         "Search ScriptBlox straight from the command bar: star a result, or open the hub already searched for it. Scripts never displace a command -- typing copy gets you the copy command.",
         "!changelog, and a version that only moves when there is an entry explaining what moved with it.",
-        "The hub does not drag -- neither the bar nor the command bar. The floating panels (activity, script hub) still do, as they always have."
+        "The hub does not drag -- neither the bar nor the command bar. The floating panels (activity, script hub) still do, as they always have.",
+        "Command bar search shows a sweeping bar while it waits on ScriptBlox, and an empty bar offers the scripts you ran most recently -- from the hub or from the bar, same list."
       ]
     },
     {
