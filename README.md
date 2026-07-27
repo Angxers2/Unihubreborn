@@ -1,17 +1,22 @@
 # Universal Hub LITE
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Angxers2/Unihubreborn/main/UniversalHubLite.lua?v="..tick()))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Angxers2/Unihubreborn/main/UniversalHubLite.lua"))()
 ```
 
-The `?v=`..`tick()` is not decoration. `raw.githubusercontent.com` answers with
-`cache-control: max-age=300`, so for five minutes after a push the CDN keeps
-serving the *previous* file — and executing in that window silently runs the
-old build, which looks exactly like the update not having worked. A unique
-query string is a different cache key, so this always reaches the origin.
+`raw.githubusercontent.com` answers with `cache-control: max-age=300`, so for
+up to five minutes after a push the CDN can still hand out the previous file.
+A `?v=` query string does **not** get around this — measured: two different
+values both come back `x-cache: HIT` with the same etag. Nothing in the URL
+defeats it.
 
-`!rexec` and the re-run after a teleport already stamp their own fetches; this
-line is the one place the script cannot do it for you.
+So if an update seems not to have landed, wait a few minutes and execute
+again. To check what is actually published rather than what a CDN node is
+holding, ask the API, which is not cached:
+
+```
+gh api repos/Angxers2/Unihubreborn/contents/UniversalHubLite.lua --jq .size
+```
 
 First run downloads the icons and fonts from `assets/` with a progress bar.
 Every run after that finds them on disk and starts straight away.
