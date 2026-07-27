@@ -1,0 +1,35 @@
+{
+  "version": "2.0.1",
+  "entries": [
+    {
+      "version": "2.0.1",
+      "date": "27 July 2026",
+      "title": "Mobile, animation packs, and a bar that moves",
+      "notes": [
+        "The bar drags anywhere and remembers where. Cards open downward, or upward when there is no room below.",
+        "Dragging has weight everywhere -- the bar, the activity panel and the script hub ease toward the pointer instead of welding to it.",
+        "Every card fits the screen it is on. Modals scale to the viewport, drawers to the room actually below them.",
+        "Touch: a labelled Commands pill that rides the card stack, tap-away to close the bar, and fly steers from the thumbstick.",
+        "Animation packs replicate -- the locomotion is driven through the Animator rather than by editing the Animate script, which only ever changed what you saw.",
+        "23 animation packs, resolved to their real animation ids. Twelve executor logos in Info.",
+        "vfly, fling, copy, walkto, follow, animpack, clearworkspace, fixanim, rexec.",
+        "Fetches carry a cache-buster, so a re-execute gets the newest build instead of the CDN's five-minute-old copy.",
+        "The camera's field of view is restored to whatever the game had, not a hardcoded 70."
+      ]
+    },
+    {
+      "version": "2.0.0",
+      "date": "25 July 2026",
+      "title": "LITE V2 -- rebuilt, not updated",
+      "notes": [
+        "V2 is not V1 with features bolted on. The interface, the command pipeline and the storage were all rewritten.",
+        "One glass design system: every bar, chip, card and modal is built from the same treatment, so the whole thing reads as one product rather than a pile of scripts.",
+        "A real command bar -- ranked suggestions, player and mode tokens with aliases, argument hints, and Enter that knows whether to complete or run.",
+        "Cards instead of windows: clock, weather, performance, profile and settings all live in one stack that reflows around whatever is open.",
+        "Everything persists -- theme, prefix, keybind, favourites, positions, usage -- and survives a teleport.",
+        "Ships from GitHub with its own icons and font, downloaded once on first run.",
+        "Infinite Yield's command set imported wholesale, so V2 is a superset of what V1 could do."
+      ]
+    }
+  ]
+}
