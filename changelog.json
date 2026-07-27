@@ -18,7 +18,8 @@
         "fling all no longer misses people. A throw that failed because they were respawning or had not loaded is retried instead of skipped, nobody is thrown twice, and dying halfway no longer ends the run -- it waits for you to come back and carries on.",
         "Flinging someone already flung this run warns instead of restarting the whole job and abandoning everyone still queued.",
         "A crowd token that names nobody says which one was empty -- 'No one is nearby', not 'no one matched nearby', which reads like a typo.",
-        "Fling's notification carries the target's headshot, like every other player command already did."
+        "Fling's notification carries the target's headshot, like every other player command already did.",
+        "Fling takes a fourth word: seconds on each target, hinted in the bar like every other valued command. !fling all fly 4."
       ]
     },
     {
