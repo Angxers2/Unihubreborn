@@ -22,7 +22,8 @@
         "Fling takes a fourth word: seconds on each target, hinted in the bar like every other valued command. !fling all fly 4.",
         "!sfling is its own command now. Standing still and flinging whoever touches you was a fling TYPE, which it never was -- it has no target, so a player, a crowd token and seconds each all meant nothing for it.",
         "The suggestion list shows every token. It used to keep two while nothing was typed, which hid five of the seven behind already knowing the word.",
-        "!introvert (or !hermit, !antisocial, !avoidfriends) leaves the game the moment someone on your friends list joins. !extrovert turns it off, and so does unloading or !stopall -- it is the only thing here that acts on its own, so it cannot be left armed behind you."
+        "!introvert (or !hermit, !antisocial, !avoidfriends) leaves the game the moment someone on your friends list joins. !extrovert turns it off, and so does unloading or !stopall -- it is the only thing here that acts on its own, so it cannot be left armed behind you.",
+        "Tokens no longer look like players in the suggestion list. Their tile was a circle -- which at that size is what a headshot is -- so a block of them read as a block of people wearing glyphs. Squared off, with a rule under the last one."
       ]
     },
     {
