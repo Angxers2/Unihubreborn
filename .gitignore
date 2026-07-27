@@ -1,0 +1,7 @@
+# scratch files that must never reach the deploy repo
+*.tmp
+v.lua
+live*.lua
+chk.lua
+now.lua
+origin.lua
