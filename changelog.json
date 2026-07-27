@@ -21,7 +21,8 @@
         "Command bar search shows a sweeping bar while it waits on ScriptBlox, and an empty bar offers the scripts you ran most recently -- from the hub or from the bar, same list.",
         "Strings are encrypted now, not just locals renamed -- the published file has no readable text in it at all.",
         "Script hub gains Running and Last used tabs; Last used follows you between games rather than resetting per place.",
-        "Command bar: searches the whole line, shows recents and scripts for this game, marks verified and key-locked ones, and says so when there are no results."
+        "Command bar: searches the whole line, shows recents and scripts for this game, marks verified and key-locked ones, and says so when there are no results.",
+        "Every shipped asset is renamed uhub_*. The executor resolves getcustomasset by FILENAME, not by path, so three scripts each shipping a logo.png fought over the name -- which is why Infinite Yield wore our mark and our splash wore another hub's bird."
       ]
     },
     {
