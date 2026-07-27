@@ -13,7 +13,12 @@
         "The kill plane and the seated state are put back on stop, on !stopall, and on unload -- a fling interrupted halfway used to leave the whole game with no kill plane and no UI left to fix it.",
         "Finding nothing is an answer, not a row: a sad face and 'Nothing found' centred in the drawer, at a size you can read, for a misspelt command as well as an empty search.",
         "Scripts already running are greyed in the command bar with a badge, so you can see it before you press rather than after the bar has closed.",
-        "Picking a script no longer also runs what you typed as a command."
+        "Picking a script no longer also runs what you typed as a command.",
+        "Three new player tokens, on every command that can take them: nearby (everyone within 100 studs), friends (everyone here off your friends list), and joined (whoever arrived last).",
+        "fling all no longer misses people. A throw that failed because they were respawning or had not loaded is retried instead of skipped, nobody is thrown twice, and dying halfway no longer ends the run -- it waits for you to come back and carries on.",
+        "Flinging someone already flung this run warns instead of restarting the whole job and abandoning everyone still queued.",
+        "A crowd token that names nobody says which one was empty -- 'No one is nearby', not 'no one matched nearby', which reads like a typo.",
+        "Fling's notification carries the target's headshot, like every other player command already did."
       ]
     },
     {
