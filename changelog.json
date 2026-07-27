@@ -14,7 +14,10 @@
         "23 animation packs, resolved to their real animation ids. Twelve executor logos in Info.",
         "vfly, fling, copy, walkto, follow, animpack, clearworkspace, fixanim, rexec.",
         "Fetches carry a cache-buster, so a re-execute gets the newest build instead of the CDN's five-minute-old copy.",
-        "The camera's field of view is restored to whatever the game had, not a hardcoded 70."
+        "The camera's field of view is restored to whatever the game had, not a hardcoded 70.",
+        "The COMMAND BAR drags by its top strip and stays where you park it -- the earlier build made the hub bar draggable instead, which was the wrong thing.",
+        "Search ScriptBlox straight from the command bar: star a result, or open the hub already searched for it. Scripts never displace a command -- typing copy gets you the copy command.",
+        "!changelog, and a version that only moves when there is an entry explaining what moved with it."
       ]
     },
     {
