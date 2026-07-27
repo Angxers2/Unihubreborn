@@ -18,7 +18,10 @@
         "Search ScriptBlox straight from the command bar: star a result, or open the hub already searched for it. Scripts never displace a command -- typing copy gets you the copy command.",
         "!changelog, and a version that only moves when there is an entry explaining what moved with it.",
         "The hub does not drag -- neither the bar nor the command bar. The floating panels (activity, script hub) still do, as they always have.",
-        "Command bar search shows a sweeping bar while it waits on ScriptBlox, and an empty bar offers the scripts you ran most recently -- from the hub or from the bar, same list."
+        "Command bar search shows a sweeping bar while it waits on ScriptBlox, and an empty bar offers the scripts you ran most recently -- from the hub or from the bar, same list.",
+        "Strings are encrypted now, not just locals renamed -- the published file has no readable text in it at all.",
+        "Script hub gains Running and Last used tabs; Last used follows you between games rather than resetting per place.",
+        "Command bar: searches the whole line, shows recents and scripts for this game, marks verified and key-locked ones, and says so when there are no results."
       ]
     },
     {
