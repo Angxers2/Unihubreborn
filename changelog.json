@@ -19,7 +19,9 @@
         "Flinging someone already flung this run warns instead of restarting the whole job and abandoning everyone still queued.",
         "A crowd token that names nobody says which one was empty -- 'No one is nearby', not 'no one matched nearby', which reads like a typo.",
         "Fling's notification carries the target's headshot, like every other player command already did.",
-        "Fling takes a fourth word: seconds on each target, hinted in the bar like every other valued command. !fling all fly 4."
+        "Fling takes a fourth word: seconds on each target, hinted in the bar like every other valued command. !fling all fly 4.",
+        "!sfling is its own command now. Standing still and flinging whoever touches you was a fling TYPE, which it never was -- it has no target, so a player, a crowd token and seconds each all meant nothing for it.",
+        "The suggestion list shows every token. It used to keep two while nothing was typed, which hid five of the seven behind already knowing the word."
       ]
     },
     {
