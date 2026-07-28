@@ -1,6 +1,16 @@
 {
-  "version": "2.3.0",
+  "version": "2.3.1",
   "entries": [
+    {
+      "version": "2.3.1",
+      "date": "27 July 2026",
+      "title": "The aim panel is a panel",
+      "notes": [
+        "The aim window is now draggable, collapsible and closable, and it stays where you leave it between sessions -- the same floating panel the Spotify card and the workspace editor use.",
+        "Clicking a mode, a toggle or a colour used to close the window. It was a modal, and changing anything in it rebuilt it from scratch; now only the contents redraw and the window stays put.",
+        "!aimbot, !silentaim and !aimassist switch an already-open panel instead of closing it, and re-arm silent aim's hook when you switch into it."
+      ]
+    },
     {
       "version": "2.3.0",
       "date": "27 July 2026",
