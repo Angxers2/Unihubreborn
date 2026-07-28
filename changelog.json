@@ -23,7 +23,16 @@
         "Reading a file shows a progress bar. readfile blocks, so the work yields a frame first -- otherwise the bar is shown and hidden without ever being drawn.",
         "A file with an extension nothing recognises is opened raw and judged on its bytes. Refusing on the name hid every .conf, .bak and extensionless file that was perfectly readable.",
         "First-seen and last-edited times per file. Not created/modified: no executor exposes a stat, so those would be invented -- these are what the hub itself observed, and they are labelled that way.",
-        "Fonts get a type glyph rather than a shirt, and the panel rebuilds on a theme change like every other card -- owning its own ScreenGui meant nothing else was repainting it."
+        "Fonts get a type glyph rather than a shirt, and the panel rebuilds on a theme change like every other card -- owning its own ScreenGui meant nothing else was repainting it.",
+        "!refreshconfig re-reads the config from disk and rebuilds, so a change made in the workspace editor two commands over does not need the whole hub re-executed.",
+        "Cut, with a scissors glyph. Same clipboard as Copy with a flag; pasting moves, writing the destination before removing the source, and the row dims while it is in flight rather than vanishing on a move you can still cancel.",
+        "The breadcrumb trail is also a text field -- click the end of it and type a path. A path that is not a folder is refused rather than silently landing you somewhere else.",
+        "Folders can be selected, and therefore deleted. delfolder was wired up from the start, but clicking a folder navigated into it, so a folder could never be the selection and Delete was unreachable for every one of them. Click selects, click again enters, the chevron goes straight in.",
+        "JSON auto-formats on open, and the button became the way back: Unformat minifies, Format lays it out again.",
+        "Deleting anything belonging to Universal Hub says so in the confirm -- which half comes back on the next execute and which does not -- and the tree marks those files with a dot so you know before you get that far.",
+        "An extension nothing recognises still gets an icon. Adding the 'unknown' kind without a glyph left every .bak, .qqq and extensionless file drawing nothing, which reads as a row that failed rather than a file of an unknown type.",
+        "Horizontal scrolling works. The momentum scroller replaced Roblox's native one and only ever drove the vertical axis, so the code view's sideways scrollbar did nothing -- shift-wheel and drag now move both.",
+        "The wheel sink moved onto UI and both panels claim it, so scrolling the workspace no longer zooms the game out either. Two panels can hold it at once without fighting over the binding."
       ]
     },
     {
