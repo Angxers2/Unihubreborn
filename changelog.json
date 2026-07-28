@@ -21,7 +21,14 @@
         "Whichever track is playing is marked in Queue, Search and Lists -- accent title, a rule down the edge, and a glyph that tells playing from paused.",
         "A track change raises a toast with the cover in it, the way a player command shows the target's face.",
         "The card sits above the clock/weather card: what is playing changes more often than the time does.",
-        "Fixes from real use: the search magnifier sat after your text because UIPadding moves children as well as text; covers were JPEGs written into .png files, which some executors accept and some silently refuse, so some art rendered and some was a blank tile; one cover shared by several rows only ever reached the first of them; the queue showed the same track eight times; and add-to-playlist could send an empty uri list and come back as 'missing required field uris'."
+        "Fixes from real use: the search magnifier sat after your text because UIPadding moves children as well as text; covers were JPEGs written into .png files, which some executors accept and some silently refuse, so some art rendered and some was a blank tile; one cover shared by several rows only ever reached the first of them; the queue showed the same track eight times; and add-to-playlist could send an empty uri list and come back as 'missing required field uris'.",
+        "The card actually shows itself now. The poll only started when you opened the card by hand, so nothing was ever watching for a track to begin -- it starts on connect instead.",
+        "Transport is solid, not hollow: at 17px a stroked triangle is mostly hole. All five glyphs are normalised to one ink height and centred, so a single size on one line really does look level.",
+        "Expanding and collapsing animates -- clip and panel together on the same curve the other cards use -- rather than teleporting between two heights.",
+        "Momentum scrolling on every list. Roblox scrolls in discrete jumps on a wheel and gives desktop no inertia at all; the wheel adds velocity and it decays per second rather than per frame, so a throw travels the same distance at 30fps as at 60.",
+        "Lists no longer jump to the top mid-scroll: a track change repaints every row to move the live mark, and that was resetting the scroll position.",
+        "One toast per track, not two. Starting something from the menu announced it, then the poll saw a new track and announced it again -- the poll's version wins because it carries the cover.",
+        "The now-playing cover restores its glyph if Roblox refuses the image. Only the small tiles had that fallback, so the big one could sit as an empty rectangle."
       ]
     },
     {
