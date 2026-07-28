@@ -12,11 +12,16 @@
         "Every link in setup has a copy button: the dashboard, the exact redirect URI, and the authorise link built from your Client ID. Paste the whole address bar back; the hub finds the code in it, and says 'access denied' rather than 'no code' when you press Cancel.",
         "The setup fields use the same wash, corner and type as everything else in the modal. They were an opaque slab with a stroke that snapped on when focused, which read as a form bolted onto the design.",
         "SHA-256 and base64url in Lua, because Spotify refuses PKCE's plain method. Verified against FIPS 180-4 vectors and RFC 7636's canonical challenge.",
-        "One card, four tabs. Now: cover, scrubber you can drag to seek, transport, shuffle, repeat, volume, and a heart wired to your library. Queue. Live search. Your playlists with covers, Liked Songs pinned, and a track played IN CONTEXT so the rest of the playlist follows.",
+        "The card rests COMPACT: cover, track, artist and 0:42 / 3:14 in a strip. Click it for the four tabs. It shows itself when something starts playing and gets out of the way when nothing is -- closing it by hand is respected until the track changes.",
         "Covers are real images -- fetched, written and served through getcustomasset, capped at 24 with the oldest evicted, cleared on disconnect.",
         "Without opening the card: !play (resume, or search-and-play by name), !pause, !skip, !back, !vol, !np, !unspotify.",
         "Migrated to Spotify's February 2026 API. PUT/DELETE /me/tracks, GET /me/tracks/contains and both /playlists/{id}/tracks endpoints were removed outright -- liking, the heart state, opening a playlist and adding to one all now use /me/library and /playlists/{id}/items. Search's maximum dropped from 50 to 10.",
-        "Transport icons from Musicbot's own set, re-cut as outlines to match the hub's stroke weight, plus a mirrored previous and an outline heart for the unliked state."
+        "Transport icons from Musicbot's own set, re-cut as outlines to match the hub's stroke weight, plus a mirrored previous and an outline heart for the unliked state.",
+        "Now playing is rebuilt: the cover is lifted off the glass with a shadow, the artist is in accent rather than a second grey, transport is bare glyphs that scale and brighten under the cursor and align to the title, and the scrubber runs along the bottom edge. It advances every frame instead of twice a second.",
+        "Whichever track is playing is marked in Queue, Search and Lists -- accent title, a rule down the edge, and a glyph that tells playing from paused.",
+        "A track change raises a toast with the cover in it, the way a player command shows the target's face.",
+        "The card sits above the clock/weather card: what is playing changes more often than the time does.",
+        "Fixes from real use: the search magnifier sat after your text because UIPadding moves children as well as text; covers were JPEGs written into .png files, which some executors accept and some silently refuse, so some art rendered and some was a blank tile; one cover shared by several rows only ever reached the first of them; the queue showed the same track eight times; and add-to-playlist could send an empty uri list and come back as 'missing required field uris'."
       ]
     },
     {
