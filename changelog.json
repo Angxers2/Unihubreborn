@@ -1,6 +1,21 @@
 {
-  "version": "2.0.2",
+  "version": "2.1.0",
   "entries": [
+    {
+      "version": "2.1.0",
+      "date": "27 July 2026",
+      "title": "Spotify, in a card",
+      "notes": [
+        "!configurespotify connects Spotify with a pasted access token, and a card appears in the stack once it is. Four tabs in one 380px card rather than Musicbot's four separate ones -- this is not a priority feature and should not take a priority feature's room.",
+        "Now: album art, track, artist, a scrubber you can drag to seek, previous/play/next, shuffle, repeat, volume, and a heart that reflects whether the track is in your library.",
+        "Queue: what is coming up. Search: live, debounced, with play, queue, like and add-to-playlist on every row. Lists: your playlists with their covers, Liked Songs pinned at the top, and clicking a track plays it IN CONTEXT so the rest of the playlist follows instead of the queue ending after one song.",
+        "Album art and playlist covers are real images. Roblox will not load a web URL, so every cover is fetched, written to disk and handed back as a custom asset -- cached, capped at 24, oldest evicted, and cleared when you disconnect.",
+        "Without opening the card: !play (resume, or search-and-play by name), !pause, !skip, !back, !vol, !np, !unspotify.",
+        "An access token, not a refresh token. It expires in an hour and you paste a new one -- deliberately, because the config is plaintext in the workspace and every other script you execute can read it. A long-lived credential and a client secret do not belong there.",
+        "Executors without a request() cannot do this at all: game:HttpGet sends no headers and cannot PUT. Setup says so on the first screen rather than after a token has been pasted.",
+        "Transport icons taken from Musicbot's own set and re-cut as outlines to match the hub's stroke weight, plus a mirrored previous and an outline heart for the unliked state."
+      ]
+    },
     {
       "version": "2.0.2",
       "date": "27 July 2026",
