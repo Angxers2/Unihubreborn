@@ -14,7 +14,16 @@
         "Rename is copy-then-delete in that order, so a failed write leaves the original rather than nothing. New names cannot contain a slash: a file goes in the folder you are looking at, not wherever the name says.",
         "Every action is gated on the specific function it needs -- an executor with readfile but no delfile is common -- and one that cannot work is dimmed rather than hidden, so the row does not jump and you can see why.",
         "There are no timestamps, because no executor exposes a stat. Size, kind and extension are everything the filesystem will actually tell us, and a Modified column would have been a fabrication.",
-        "Built from the parts that already existed: the shared gradient buttons, the modal, the drag easer, the chrome buttons, and the momentum scroller -- which moved off the Spotify panel onto UI so both use one copy."
+        "Built from the parts that already existed: the shared gradient buttons, the modal, the drag easer, the chrome buttons, and the momentum scroller -- which moved off the Spotify panel onto UI so both use one copy.",
+        "Copy became copy-then-paste: pick a file up, open any folder, put it down. It used to duplicate in place, which is the one thing you can already do by pasting without moving. Plus a Path button that copies the full path.",
+        "The action row wraps instead of running off the edge. gradButton ships at width 10 and expects the caller to size it, so the wrap check was comparing every button against 10 and Delete sat outside the panel.",
+        "Code reads as code: no wrapping, a line-number gutter, and sideways scrolling. A minified JSON wrapped to the pane was one grey paragraph with no structure in it.",
+        "The editor shows a cursor. A TextBox with transparent text hides its caret and its selection too, so the highlighted overlay made it impossible to see where you were typing -- it now shows colour while you read and plain text the moment you click in.",
+        "Selecting a file no longer rebuilds the whole tree. Two rows retint; the list stays put and keeps its scroll and hover.",
+        "Reading a file shows a progress bar. readfile blocks, so the work yields a frame first -- otherwise the bar is shown and hidden without ever being drawn.",
+        "A file with an extension nothing recognises is opened raw and judged on its bytes. Refusing on the name hid every .conf, .bak and extensionless file that was perfectly readable.",
+        "First-seen and last-edited times per file. Not created/modified: no executor exposes a stat, so those would be invented -- these are what the hub itself observed, and they are labelled that way.",
+        "Fonts get a type glyph rather than a shirt, and the panel rebuilds on a theme change like every other card -- owning its own ScreenGui meant nothing else was repainting it."
       ]
     },
     {
