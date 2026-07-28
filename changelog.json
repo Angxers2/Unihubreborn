@@ -4,16 +4,19 @@
     {
       "version": "2.1.0",
       "date": "27 July 2026",
-      "title": "Spotify, in a card",
+      "title": "Spotify, connected once",
       "notes": [
-        "!configurespotify connects Spotify with a pasted access token, and a card appears in the stack once it is. Four tabs in one 380px card rather than Musicbot's four separate ones -- this is not a priority feature and should not take a priority feature's room.",
-        "Now: album art, track, artist, a scrubber you can drag to seek, previous/play/next, shuffle, repeat, volume, and a heart that reflects whether the track is in your library.",
-        "Queue: what is coming up. Search: live, debounced, with play, queue, like and add-to-playlist on every row. Lists: your playlists with their covers, Liked Songs pinned at the top, and clicking a track plays it IN CONTEXT so the rest of the playlist follows instead of the queue ending after one song.",
-        "Album art and playlist covers are real images. Roblox will not load a web URL, so every cover is fetched, written to disk and handed back as a custom asset -- cached, capped at 24, oldest evicted, and cleared when you disconnect.",
+        "!configurespotify connects Spotify for good. Authorization Code with PKCE, so it renews itself in the background and you never paste anything again -- rather than a token that died after an hour.",
+        "PKCE means NO client secret. What sits in the config is a refresh token and a client ID; the hub trades them for a fresh access token a minute before each one lapses, and a 401 mid-session renews and retries instead of telling you to reconnect.",
+        "Spotify Premium is required, and the setup modal says so first -- for playback control, as always, and since February 2026 to hold a developer app at all.",
+        "Every link in setup has a copy button: the dashboard, the exact redirect URI, and the authorise link built from your Client ID. Paste the whole address bar back; the hub finds the code in it, and says 'access denied' rather than 'no code' when you press Cancel.",
+        "The setup fields use the same wash, corner and type as everything else in the modal. They were an opaque slab with a stroke that snapped on when focused, which read as a form bolted onto the design.",
+        "SHA-256 and base64url in Lua, because Spotify refuses PKCE's plain method. Verified against FIPS 180-4 vectors and RFC 7636's canonical challenge.",
+        "One card, four tabs. Now: cover, scrubber you can drag to seek, transport, shuffle, repeat, volume, and a heart wired to your library. Queue. Live search. Your playlists with covers, Liked Songs pinned, and a track played IN CONTEXT so the rest of the playlist follows.",
+        "Covers are real images -- fetched, written and served through getcustomasset, capped at 24 with the oldest evicted, cleared on disconnect.",
         "Without opening the card: !play (resume, or search-and-play by name), !pause, !skip, !back, !vol, !np, !unspotify.",
-        "An access token, not a refresh token. It expires in an hour and you paste a new one -- deliberately, because the config is plaintext in the workspace and every other script you execute can read it. A long-lived credential and a client secret do not belong there.",
-        "Executors without a request() cannot do this at all: game:HttpGet sends no headers and cannot PUT. Setup says so on the first screen rather than after a token has been pasted.",
-        "Transport icons taken from Musicbot's own set and re-cut as outlines to match the hub's stroke weight, plus a mirrored previous and an outline heart for the unliked state."
+        "Migrated to Spotify's February 2026 API. PUT/DELETE /me/tracks, GET /me/tracks/contains and both /playlists/{id}/tracks endpoints were removed outright -- liking, the heart state, opening a playlist and adding to one all now use /me/library and /playlists/{id}/items. Search's maximum dropped from 50 to 10.",
+        "Transport icons from Musicbot's own set, re-cut as outlines to match the hub's stroke weight, plus a mirrored previous and an outline heart for the unliked state."
       ]
     },
     {
