@@ -32,7 +32,9 @@
         "Repeat-one carries a 1. Rotating a circular arrow 180 degrees to mean repeat-one is a circular arrow.",
         "Like and add-to-playlist moved up beside the title. They sat under the album art, a long way from the transport, reading as part of neither.",
         "The clock/weather card is back in the slot it has always had.",
-        "The panel shows itself when something starts playing and steps aside when nothing is; closing it by hand is respected until the track changes. Nothing was polling while it was shut, so it could never do that before."
+        "The panel shows itself when something starts playing and steps aside when nothing is; closing it by hand is respected until the track changes. Nothing was polling while it was shut, so it could never do that before.",
+        "The panel no longer appears on execute. A ScreenGui is Enabled by default, so building one and parenting an opaque panel into it put the panel on screen the moment the hub loaded -- built now means built, not shown, and auto-show ignores the first poll because something already playing when you execute is not an event.",
+        "Scrolling could lock up entirely. The wheel is sunk while the pointer is over the panel, and that was driven by MouseEnter/MouseLeave -- a Leave missed because the gui was disabled under the cursor, or a row destroyed mid-hover while a list reloaded, left the wheel sunk for the rest of the session with scrolling and zoom dead everywhere. It is recomputed from the cursor every frame now, so there is no state to get stuck in."
       ]
     },
     {
