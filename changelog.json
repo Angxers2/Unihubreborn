@@ -1,6 +1,22 @@
 {
-  "version": "2.1.0",
+  "version": "2.2.0",
   "entries": [
+    {
+      "version": "2.2.0",
+      "date": "27 July 2026",
+      "title": "A workspace editor",
+      "notes": [
+        "!workspace (or !files, !editor, !explorer, !fs) opens a file manager for the executor's WHOLE workspace, not just unihub's corner of it. Draggable, collapsible, closable, and it remembers where you put it.",
+        "Browse with clickable breadcrumbs, filter the current folder as you type, and open a file to read it. Text files open in an editable box with Save; images render; anything else says why it cannot be shown rather than showing an empty pane.",
+        "Create a file with its contents and extension, make folders, rename, duplicate, and run a .lua straight from the tree.",
+        "It opens on unihub, because that is what anyone opening it from inside the hub is looking for. The workspace root is one click up, and it remembers where you were after that.",
+        "Deleting goes through the same staged confirm the config wipe uses -- it names the full path, says how many items are inside a folder, and waits before the button arms. This reaches every other script's data and nothing here goes to a bin.",
+        "Rename is copy-then-delete in that order, so a failed write leaves the original rather than nothing. New names cannot contain a slash: a file goes in the folder you are looking at, not wherever the name says.",
+        "Every action is gated on the specific function it needs -- an executor with readfile but no delfile is common -- and one that cannot work is dimmed rather than hidden, so the row does not jump and you can see why.",
+        "There are no timestamps, because no executor exposes a stat. Size, kind and extension are everything the filesystem will actually tell us, and a Modified column would have been a fabrication.",
+        "Built from the parts that already existed: the shared gradient buttons, the modal, the drag easer, the chrome buttons, and the momentum scroller -- which moved off the Spotify panel onto UI so both use one copy."
+      ]
+    },
     {
       "version": "2.1.0",
       "date": "27 July 2026",
