@@ -1,6 +1,22 @@
 {
-  "version": "2.2.0",
+  "version": "2.3.0",
   "entries": [
+    {
+      "version": "2.3.0",
+      "date": "27 July 2026",
+      "title": "Aim",
+      "notes": [
+        "!aim opens a panel with three modes behind one target picker: Assist nudges your aim, Lock holds the camera while you hold the bind, and Silent never moves the camera at all. !aimassist, !aimbot and !silentaim open straight into one of them; !unaim turns it off.",
+        "Field of view as a real circle on screen, which turns accent when it has somebody. Smoothness, prediction, team check, wall check, and colour pickers for the circle and the target line -- through the same picker the ESP colours use.",
+        "Smoothing is framerate independent. A fixed per-frame lerp snaps twice as hard at 120fps as at 60, which is the difference between an assist and an obvious lock depending on whose machine it runs on.",
+        "It targets whoever is nearest your CROSSHAIR rather than nearest to you -- the one you were already closest to pointing at is the one you meant -- and sticky keeps that target while you hold, so somebody crossing in front cannot steal your aim mid-shot.",
+        "Prediction leads their velocity and is off by default: leading a hitscan shot is a miss.",
+        "Wall check is off by default because it costs a raycast per player per frame, and the panel says so rather than leaving you to find out.",
+        "Silent aim is honest about its limits. It answers the game's own hit test rather than moving anything, which only works where the game asks in a way a metamethod hook can reach -- the mode description says so, and an executor that cannot hook says so on the spot instead of failing quietly. Both hooks check the caller so they never lie to the hub's own code, and only answer while you are actually holding the bind with a target.",
+        "Settings, bind and colours persist, and are type-checked on the way back off disk -- the config is a file anything can edit.",
+        "The slider moved onto UI, so the Spotify scrubber, the volume and every numeric setting here are one implementation of \"drag a value between two ends\" rather than three."
+      ]
+    },
     {
       "version": "2.2.0",
       "date": "27 July 2026",
