@@ -1,6 +1,17 @@
 {
-  "version": "2.3.2",
+  "version": "2.3.3",
   "entries": [
+    {
+      "version": "2.3.3",
+      "date": "28 July 2026",
+      "title": "Crisper text, and a font viewer that shows the whole family",
+      "notes": [
+        "Text is no longer pixellated at small sizes. Roblox rasterises a glyph atlas at whole pixel sizes -- ask for 13.5 and it rasterises at one size and scales to another. Two steps of the type scale were fractional (13.5 and 11.5), which is every row title and every grey sub line in the interface. Both are whole numbers now.",
+        "The workspace font viewer showed one weight because that is all it ever built: a .ttf holds one face, and the viewer staged the single file you clicked and declared it Regular 400 whatever it actually was.",
+        "It now reads the weight out of the filename and gathers every font file beside it that belongs to the same family, so opening any one of Manrope's six weights previews all six -- each line rendered in its own weight, lightest first, with the one you clicked in white. The size samples use the weight you opened rather than the family default.",
+        "The preview scrolls, since a family is any number of weights and the pane is 80px tall on a phone."
+      ]
+    },
     {
       "version": "2.3.2",
       "date": "28 July 2026",
