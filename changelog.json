@@ -14,7 +14,7 @@
         "!chatlog keeps everything said since you executed -- a headshot, who, the exact time, and who was standing close enough to have been part of it. Copy, save and clear. It prunes to the last 800 lines as they arrive, so it stays around 200KB rather than growing into something you notice.",
         "!showchat turns the chat back on in a game that hid it, on either of the two chat systems Roblox ships. !enableshiftlock does the same for shift lock, which games turn off with a property on your own player object.",
         "The command bar suggests who you probably mean rather than listing the roster in join order. Whoever just killed you comes first, then anyone you have just named in a command, then recent chat, then who just joined, with standing nearby as a nudge on top. Kills are attributed by the creator tag, the way Roblox does it -- never guessed from who was closest, which would put the wrong name at the top exactly when you are in a hurry.",
-        "Clicking a name in the command bar fills it in and stops there. It used to run the command on the spot, so picking somebody off the list was the same gesture as flinging them, with nothing in between to change your mind. Enter is that step."
+        "Clicking a name in the command bar fills it in and moves on to the next argument. It used to run the command on the spot, so picking somebody off the list was the same gesture as flinging them, with nothing in between to change your mind -- and once that was fixed it stayed on the name, because the completion did not end on a space and the list read it as still being typed. Picking a style word advances the same way, since fling takes seconds after it."
       ]
     },
     {
