@@ -4,12 +4,16 @@
     {
       "version": "2.3.3",
       "date": "28 July 2026",
-      "title": "Crisper text, and a font viewer that shows the whole family",
+      "title": "Crisper text, a font repair command, and two more panels you can move",
       "notes": [
         "Text is no longer pixellated at small sizes. Roblox rasterises a glyph atlas at whole pixel sizes -- ask for 13.5 and it rasterises at one size and scales to another. Two steps of the type scale were fractional (13.5 and 11.5), which is every row title and every grey sub line in the interface. Both are whole numbers now.",
         "The workspace font viewer showed one weight because that is all it ever built: a .ttf holds one face, and the viewer staged the single file you clicked and declared it Regular 400 whatever it actually was.",
         "It now reads the weight out of the filename and gathers every font file beside it that belongs to the same family, so opening any one of Manrope's six weights previews all six -- each line rendered in its own weight, lightest first, with the one you clicked in white. The size samples use the weight you opened rather than the family default.",
-        "The preview scrolls, since a family is any number of weights and the pane is 80px tall on a phone."
+        "The preview scrolls, since a family is any number of weights and the pane is 80px tall on a phone.",
+        "!fixfont checks the font files on disk, repairs what a re-download can fix, and says which of the three causes rough text actually is -- damaged files, an executor that will not load them, or an executor whose renderer is simply worse at a font it has to rasterise itself. Damaged files were invisible before: the only check was that the file existed, so a truncated download stayed broken for good.",
+        "!fixfont builtin swaps to Roblox's own font, which is baked into the client and always draws sharp. !fixfont manrope goes back. The choice is remembered.",
+        "The ESP window is now a floating panel like the aim one -- draggable, collapsible to a strip that says how many features are drawing, closable, and it stays where you leave it. Refresh and Clear moved inline.",
+        "The aim panel's mode description and bind hint were drawn on top of each other. Fixed, its rows now sit on the same cards the rest of the hub uses, and ESP is one click away from it since the two are used together."
       ]
     },
     {
