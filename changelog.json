@@ -1,6 +1,17 @@
 {
-  "version": "2.3.1",
+  "version": "2.4.0",
   "entries": [
+    {
+      "version": "2.4.0",
+      "date": "28 July 2026",
+      "title": "One workspace, several accounts",
+      "notes": [
+        "Sign in on a second Roblox account and the hub asks once, before anything else: keep using the config that is already here, or set this account up as new. It shows both accounts side by side -- the one that saved it, with when it was last used, and yours, marked NEW.",
+        "Set up as new gives that account its own config file. Theme, prefix, keybind, saved scripts and Spotify sign-in all start clean, and the other account's config is left exactly as it was -- this starts one, it does not take one over.",
+        "Tick remember and every account after that is handled the same way without asking. The notification that applies it has a Change button, so it is not a decision you make once and cannot find again.",
+        "Asked once and only once. Agreeing is recorded per account rather than by moving ownership, otherwise two accounts on one machine would prompt each other on every other boot. After the answer, the guide or the resume prompt gets its turn as normal -- which of the two depends on what you picked."
+      ]
+    },
     {
       "version": "2.3.1",
       "date": "27 July 2026",
