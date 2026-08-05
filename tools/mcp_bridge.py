@@ -39,7 +39,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 PORT = 8421
 PROTOCOL = "2024-11-05"
-VERSION = "1.2"
+VERSION = "1.3"
 RAW = ("https://raw.githubusercontent.com/Angxers2/Unihubreborn/main/"
        "tools/mcp_bridge.py")
 
@@ -74,6 +74,9 @@ CLIENT = [None]
 # Whether this process holds the port. False means another copy does and
 # we forward to it.
 OWNER = [False]
+# serve_stdio and the list_changed notifier both write to stdout, and two
+# interleaved JSON lines are two corrupt messages.
+OUT_LOCK = threading.Lock()
 
 # Loopback is not a boundary. Any page the user visits can fetch() a
 # 127.0.0.1 URL, so an endpoint that RUNS something needs to prove the
@@ -127,6 +130,17 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _bad_host(self) -> bool:
+        """A request that did not address this machine by name.
+
+        DNS rebinding works by pointing a hostname the browser trusts at
+        127.0.0.1; the connection arrives here carrying THAT name in Host.
+        Checking it is the standard guard, and it costs one comparison.
+        """
+        h = (self.headers.get("Host") or "").lower()
+        return h not in ("127.0.0.1:%d" % PORT, "localhost:%d" % PORT,
+                         "[::1]:%d" % PORT)
+
     def _from_browser(self) -> bool:
         """Did a page send this? Browsers attach these; HTTP libraries do not.
 
@@ -141,7 +155,7 @@ class Handler(BaseHTTPRequestHandler):
         global TOOLS, TOOLS_AT
         path = self.path.split("?")[0]
 
-        if self._from_browser():
+        if self._from_browser() or self._bad_host():
             self.send_error(403, "not reachable from a page")
             return
 
@@ -151,8 +165,16 @@ class Handler(BaseHTTPRequestHandler):
             SEEN_HUB[0] = True
             if isinstance(tools, list) and tools:
                 with LOCK:
+                    had = len(TOOLS)
                     TOOLS = tools
                     TOOLS_AT = time.time()
+                # We advertise listChanged, so we owe the client this. Going
+                # from the hub_not_connected placeholder to a real list
+                # without saying so is what strands a session that listed
+                # tools before the game connected -- it keeps the placeholder
+                # forever, and no amount of !mcp on changes what it sees.
+                if had == 0 and tools:
+                    notify_list_changed()
             else:
                 TOOLS_AT = time.time()
             # Drained rather than popped one at a time: the hub can run a
@@ -160,9 +182,15 @@ class Handler(BaseHTTPRequestHandler):
             jobs = []
             while len(jobs) < 8:
                 try:
-                    jobs.append(JOBS.get_nowait())
+                    j = JOBS.get_nowait()
                 except queue.Empty:
                     break
+                # Queued before the hub dropped and drained after it came
+                # back is a call running minutes late, possibly in a
+                # different game. Its caller gave up long ago.
+                if time.time() - j.get("at", 0) > CALL_TIMEOUT:
+                    continue
+                jobs.append(j)
             self._send({"jobs": jobs, "client": CLIENT[0], "version": VERSION})
             return
 
@@ -192,17 +220,21 @@ class Handler(BaseHTTPRequestHandler):
                 if jid is None:
                     continue
                 with LOCK:
-                    RESULTS[jid] = r
                     ev = WAITING.get(jid)
-                if ev:
-                    ev.set()
+                    # A late answer to a call that already timed out has
+                    # nobody to give it to, and keeping it grows RESULTS
+                    # for the life of the process.
+                    if ev is None:
+                        continue
+                    RESULTS[jid] = r
+                ev.set()
             self._send({"ok": True})
             return
 
         self.send_error(404, "no such path")
 
     def do_GET(self):  # noqa: N802
-        if self._from_browser():
+        if self._from_browser() or self._bad_host():
             self.send_error(403, "not reachable from a page")
             return
         if self.path.split("?")[0] == "/tools":
@@ -234,7 +266,7 @@ def call_tool(name: str, args: dict) -> tuple[str, bool]:
         jid = NEXT_ID[0]
         ev = threading.Event()
         WAITING[jid] = ev
-    JOBS.put({"id": jid, "tool": name, "args": args})
+    JOBS.put({"id": jid, "tool": name, "args": args, "at": time.time()})
 
     if not ev.wait(CALL_TIMEOUT):
         with LOCK:
@@ -251,6 +283,32 @@ def call_tool(name: str, args: dict) -> tuple[str, bool]:
 
 
 # ── proxy side: another copy holds the port ─────────────────────────────
+def say(msg: dict):
+    """One JSON line on stdout, under the lock that keeps them whole."""
+    with OUT_LOCK:
+        sys.stdout.write(json.dumps(msg) + "\n")
+        sys.stdout.flush()
+
+
+def notify_list_changed():
+    say({"jsonrpc": "2.0", "method": "notifications/tools/list_changed"})
+
+
+def watch_tools():
+    """A proxy has no /poll of its own, so it watches the owner's count."""
+    seen = 0
+    while not STOP.wait(1.5):
+        if OWNER[0]:
+            return  # the owner notifies from /poll, where it learns first
+        try:
+            n = ask_owner_get("/health", timeout=3).get("tools") or 0
+        except (urllib.error.URLError, OSError, ValueError):
+            continue
+        if n and not seen:
+            notify_list_changed()
+        seen = n
+
+
 def ask_owner(path: str, obj=None, timeout: float = 10):
     url = "http://127.0.0.1:%d%s" % (PORT, path)
     data = json.dumps(obj).encode("utf8") if obj is not None else None
@@ -258,6 +316,14 @@ def ask_owner(path: str, obj=None, timeout: float = 10):
         "Content-Type": "application/json",
         "X-UHub-Token": TOKEN,
     })
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read())
+
+
+def ask_owner_get(path: str, timeout: float = 5):
+    req = urllib.request.Request(
+        "http://127.0.0.1:%d%s" % (PORT, path),
+        headers={"X-UHub-Token": TOKEN})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read())
 
@@ -312,7 +378,12 @@ def rpc(msg: dict):
     mid = msg.get("id")
 
     if method == "initialize":
-        info = (msg.get("params") or {}).get("clientInfo") or {}
+        params = msg.get("params") or {}
+        # Answer in the version they asked for when we understand it, rather
+        # than insisting on ours and hoping they cope.
+        want = params.get("protocolVersion")
+        proto = want if isinstance(want, str) and want else PROTOCOL
+        info = params.get("clientInfo") or {}
         name = info.get("name")
         if isinstance(name, str) and name.strip():
             v = info.get("version")
@@ -320,9 +391,9 @@ def rpc(msg: dict):
         return {
             "jsonrpc": "2.0", "id": mid,
             "result": {
-                "protocolVersion": PROTOCOL,
+                "protocolVersion": proto,
                 "capabilities": {"tools": {"listChanged": True}},
-                "serverInfo": {"name": "universal-hub", "version": "1.0.0"},
+                "serverInfo": {"name": "universal-hub", "version": VERSION},
             },
         }
 
@@ -360,7 +431,6 @@ def rpc(msg: dict):
 
 
 def serve_stdio():
-    out = sys.stdout
     for line in sys.stdin:
         if STOP.is_set():
             return
@@ -377,8 +447,7 @@ def serve_stdio():
             reply = {"jsonrpc": "2.0", "id": msg.get("id"),
                      "error": {"code": -32603, "message": str(e)}}
         if reply is not None:
-            out.write(json.dumps(reply) + "\n")
-            out.flush()
+            say(reply)
 
 
 def watchdog():
@@ -412,13 +481,33 @@ def self_update():
     # It has to look like this program before it is allowed to become it.
     if len(new) < 4000 or b"universal-hub bridge" not in new:
         return
+    # It has to be a program before it is allowed to become this one. A
+    # substring check would let a truncated publish through, and the only
+    # symptom on the far end is "Connection closed" with no cause.
+    try:
+        compile(new, "<update>", "exec")
+    except (SyntaxError, ValueError):
+        print("universal-hub bridge: the published bridge does not compile, "
+              "keeping this one", file=sys.stderr)
+        return
     here = os.path.abspath(__file__)
     try:
         if open(here, "rb").read() == new:
             return
-        with open(here, "wb") as f:
+        # Written beside it and moved into place: truncate-then-write leaves
+        # half a file if the machine sleeps mid-write, and half a file is a
+        # bridge that never starts again.
+        tmp = here + ".new"
+        with open(tmp, "wb") as f:
             f.write(new)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, here)
     except OSError:
+        try:
+            os.unlink(here + ".new")
+        except OSError:
+            pass
         return
     print("universal-hub bridge: a newer bridge was published and has been "
           "written to %s -- it takes effect next time your client starts it"
@@ -456,6 +545,7 @@ def main():
         # "Connection closed".
         print("universal-hub bridge: another bridge holds 127.0.0.1:%d, "
               "forwarding to it" % PORT, file=sys.stderr)
+        threading.Thread(target=watch_tools, daemon=True).start()
     try:
         serve_stdio()
         # stdin ended. Launched by an MCP client that means the client is
