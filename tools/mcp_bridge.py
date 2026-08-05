@@ -256,6 +256,15 @@ def main():
           file=sys.stderr)
     try:
         serve_stdio()
+        # stdin ended. Launched by an MCP client that means the client is
+        # gone; run straight from a terminal with stdin backgrounded or
+        # redirected it means there was never a client at all -- and the
+        # hub still needs the queue. Exiting here is what made a bridge
+        # started with & or nohup print the banner and die.
+        if not STOP.is_set():
+            print("universal-hub bridge: no MCP client on stdin, serving the "
+                  "hub queue only", file=sys.stderr)
+            STOP.wait()
     except KeyboardInterrupt:
         pass
 
