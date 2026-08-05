@@ -29,6 +29,7 @@ loopback only, and the MCP side talks to the process that launched it.
 import json
 import os
 import queue
+import secrets
 import urllib.error
 import urllib.request
 import sys
@@ -38,7 +39,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 PORT = 8421
 PROTOCOL = "2024-11-05"
-VERSION = "1.1"
+VERSION = "1.2"
 RAW = ("https://raw.githubusercontent.com/Angxers2/Unihubreborn/main/"
        "tools/mcp_bridge.py")
 
@@ -74,6 +75,34 @@ CLIENT = [None]
 # we forward to it.
 OWNER = [False]
 
+# Loopback is not a boundary. Any page the user visits can fetch() a
+# 127.0.0.1 URL, so an endpoint that RUNS something needs to prove the
+# caller is one of ours. A proxy is a different process and cannot read the
+# owner's memory, so the secret goes in a file only the user can read --
+# which a web page cannot do.
+TOKEN_PATH = os.path.join(os.path.expanduser("~"), ".uhub_mcp_token")
+
+
+def shared_token() -> str:
+    try:
+        if os.path.exists(TOKEN_PATH):
+            t = open(TOKEN_PATH, encoding="utf8").read().strip()
+            if t:
+                return t
+    except OSError:
+        pass
+    t = secrets.token_hex(16)
+    try:
+        fd = os.open(TOKEN_PATH, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w") as f:
+            f.write(t)
+    except OSError:
+        pass  # unwritable home: the token is still consistent in-process
+    return t
+
+
+TOKEN = shared_token()
+
 
 def hub_online() -> bool:
     return (time.time() - TOOLS_AT) < FRESH
@@ -98,9 +127,23 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _from_browser(self) -> bool:
+        """Did a page send this? Browsers attach these; HTTP libraries do not.
+
+        This is what stops a site the user happens to be visiting from
+        driving their game through the loopback port.
+        """
+        h = self.headers
+        return bool(h.get("Origin") or h.get("Sec-Fetch-Mode")
+                    or h.get("Sec-Fetch-Site"))
+
     def do_POST(self):  # noqa: N802  (http.server's naming)
         global TOOLS, TOOLS_AT
         path = self.path.split("?")[0]
+
+        if self._from_browser():
+            self.send_error(403, "not reachable from a page")
+            return
 
         if path == "/poll":
             data = self._read()
@@ -132,6 +175,12 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/call":
             # A proxy handing over its client's call. Same path a local one
             # takes -- there is no second implementation of running a tool.
+            # It is the one endpoint that EXECUTES, so it is the one that
+            # has to prove who is asking.
+            if not secrets.compare_digest(
+                    self.headers.get("X-UHub-Token") or "", TOKEN):
+                self.send_error(401, "bad or missing token")
+                return
             d = self._read()
             text, bad = call_tool(d.get("tool") or "", d.get("args") or {})
             self._send({"error": text} if bad else {"result": text})
@@ -153,6 +202,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_error(404, "no such path")
 
     def do_GET(self):  # noqa: N802
+        if self._from_browser():
+            self.send_error(403, "not reachable from a page")
+            return
         if self.path.split("?")[0] == "/tools":
             with LOCK:
                 self._send({"tools": list(TOOLS)})
@@ -202,8 +254,10 @@ def call_tool(name: str, args: dict) -> tuple[str, bool]:
 def ask_owner(path: str, obj=None, timeout: float = 10):
     url = "http://127.0.0.1:%d%s" % (PORT, path)
     data = json.dumps(obj).encode("utf8") if obj is not None else None
-    req = urllib.request.Request(
-        url, data=data, headers={"Content-Type": "application/json"})
+    req = urllib.request.Request(url, data=data, headers={
+        "Content-Type": "application/json",
+        "X-UHub-Token": TOKEN,
+    })
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read())
 
