@@ -53,6 +53,10 @@ FRESH = 6
 IDLE_EXIT = 120
 SEEN_HUB = [False]
 STOP = threading.Event()
+# Whoever spoke initialize. Passed on to the hub so it can say "connected to
+# Claude Code" rather than "connected", which is the difference between a
+# toast that tells you something and one that just blinks.
+CLIENT = [None]
 
 
 def hub_online() -> bool:
@@ -100,7 +104,7 @@ class Handler(BaseHTTPRequestHandler):
                     jobs.append(JOBS.get_nowait())
                 except queue.Empty:
                     break
-            self._send({"jobs": jobs})
+            self._send({"jobs": jobs, "client": CLIENT[0]})
             return
 
         if path == "/shutdown":
@@ -128,7 +132,8 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.split("?")[0] == "/health":
             # Answering at all IS the answer to "is the bridge installed and
             # running" -- the hub has no other way to look.
-            self._send({"ok": True, "hub": hub_online(), "tools": len(TOOLS)})
+            self._send({"ok": True, "hub": hub_online(), "tools": len(TOOLS),
+                        "client": CLIENT[0]})
             return
         self.send_error(404, "no such path")
 
@@ -171,6 +176,11 @@ def rpc(msg: dict):
     mid = msg.get("id")
 
     if method == "initialize":
+        info = (msg.get("params") or {}).get("clientInfo") or {}
+        name = info.get("name")
+        if isinstance(name, str) and name.strip():
+            v = info.get("version")
+            CLIENT[0] = name.strip() + (" " + str(v) if isinstance(v, str) and v else "")
         return {
             "jsonrpc": "2.0", "id": mid,
             "result": {
