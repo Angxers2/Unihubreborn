@@ -15,12 +15,22 @@ from Roblox, which is the only shape that works from in there.
 
     claude mcp add universal-hub -- python3 /path/to/mcp_bridge.py
 
+Every MCP client spawns its OWN copy of this file, so only the first one to
+start can hold the port. That one owns the queue the game polls; the rest
+find the port taken and become proxies, forwarding their clients' calls to
+the owner over the same loopback interface. Binding unconditionally is what
+made the second session die with EADDRINUSE the moment a first was running
+-- and the client reads that as "Connection closed".
+
 Nothing is stored and nothing is sent anywhere: the HTTP side binds to
 loopback only, and the MCP side talks to the process that launched it.
 """
 
 import json
+import os
 import queue
+import urllib.error
+import urllib.request
 import sys
 import threading
 import time
@@ -28,6 +38,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 PORT = 8421
 PROTOCOL = "2024-11-05"
+VERSION = "1.1"
+RAW = ("https://raw.githubusercontent.com/Angxers2/Unihubreborn/main/"
+       "tools/mcp_bridge.py")
 
 # The hub tells us what it has on every poll, so a tool added to the hub
 # needs no change here. Empty until the game connects, which is also how we
@@ -57,6 +70,9 @@ STOP = threading.Event()
 # Claude Code" rather than "connected", which is the difference between a
 # toast that tells you something and one that just blinks.
 CLIENT = [None]
+# Whether this process holds the port. False means another copy does and
+# we forward to it.
+OWNER = [False]
 
 
 def hub_online() -> bool:
@@ -104,13 +120,21 @@ class Handler(BaseHTTPRequestHandler):
                     jobs.append(JOBS.get_nowait())
                 except queue.Empty:
                     break
-            self._send({"jobs": jobs, "client": CLIENT[0]})
+            self._send({"jobs": jobs, "client": CLIENT[0], "version": VERSION})
             return
 
         if path == "/shutdown":
             # !mcp off, said directly rather than waited out.
             self._send({"ok": True})
             STOP.set()
+            return
+
+        if path == "/call":
+            # A proxy handing over its client's call. Same path a local one
+            # takes -- there is no second implementation of running a tool.
+            d = self._read()
+            text, bad = call_tool(d.get("tool") or "", d.get("args") or {})
+            self._send({"error": text} if bad else {"result": text})
             return
 
         if path == "/results":
@@ -129,11 +153,15 @@ class Handler(BaseHTTPRequestHandler):
         self.send_error(404, "no such path")
 
     def do_GET(self):  # noqa: N802
+        if self.path.split("?")[0] == "/tools":
+            with LOCK:
+                self._send({"tools": list(TOOLS)})
+            return
         if self.path.split("?")[0] == "/health":
             # Answering at all IS the answer to "is the bridge installed and
             # running" -- the hub has no other way to look.
             self._send({"ok": True, "hub": hub_online(), "tools": len(TOOLS),
-                        "client": CLIENT[0]})
+                        "client": CLIENT[0], "version": VERSION})
             return
         self.send_error(404, "no such path")
 
@@ -170,6 +198,60 @@ def call_tool(name: str, args: dict) -> tuple[str, bool]:
     return (str(r.get("result", "done")), False)
 
 
+# ── proxy side: another copy holds the port ─────────────────────────────
+def ask_owner(path: str, obj=None, timeout: float = 10):
+    url = "http://127.0.0.1:%d%s" % (PORT, path)
+    data = json.dumps(obj).encode("utf8") if obj is not None else None
+    req = urllib.request.Request(
+        url, data=data, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read())
+
+
+def take_over() -> bool:
+    """The owner has gone. Try to become it rather than staying broken."""
+    srv = bind()
+    if not srv:
+        return False
+    OWNER[0] = True
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    threading.Thread(target=watchdog, daemon=True).start()
+    threading.Thread(target=lambda: (STOP.wait(), srv.shutdown()), daemon=True).start()
+    print("universal-hub bridge: took the port over from a bridge that left",
+          file=sys.stderr)
+    return True
+
+
+def list_tools() -> list:
+    if OWNER[0]:
+        with LOCK:
+            return list(TOOLS)
+    try:
+        return ask_owner("/tools", timeout=5).get("tools") or []
+    except (urllib.error.URLError, OSError, ValueError):
+        # The owner went away mid-session. Becoming it is better than
+        # reporting an empty toolbox for the rest of this one.
+        if take_over():
+            with LOCK:
+                return list(TOOLS)
+        return []
+
+
+def run_tool(name: str, args: dict) -> tuple[str, bool]:
+    if OWNER[0]:
+        return call_tool(name, args)
+    try:
+        d = ask_owner("/call", {"tool": name, "args": args},
+                      timeout=CALL_TIMEOUT + 10)
+    except (urllib.error.URLError, OSError, ValueError) as e:
+        if take_over():
+            return call_tool(name, args)
+        return ("The bridge holding the queue went away: %s" % e, True)
+    if "error" in d:
+        return (str(d["error"]), True)
+    return (str(d.get("result", "done")), False)
+
+
 def rpc(msg: dict):
     """Answer one JSON-RPC message. Returns a reply dict, or None."""
     method = msg.get("method")
@@ -195,8 +277,7 @@ def rpc(msg: dict):
         return None
 
     if method == "tools/list":
-        with LOCK:
-            tools = list(TOOLS)
+        tools = list_tools()
         if not tools:
             # Better than an empty list: the client shows the reason.
             tools = [{
@@ -210,7 +291,7 @@ def rpc(msg: dict):
 
     if method == "tools/call":
         p = msg.get("params") or {}
-        text, bad = call_tool(p.get("name") or "", p.get("arguments") or {})
+        text, bad = run_tool(p.get("name") or "", p.get("arguments") or {})
         return {
             "jsonrpc": "2.0", "id": mid,
             "result": {"content": [{"type": "text", "text": text}],
@@ -249,21 +330,78 @@ def serve_stdio():
 def watchdog():
     """Stop once the game has been gone a while, having once been here."""
     while not STOP.wait(5):
-        if SEEN_HUB[0] and (time.time() - TOOLS_AT) > IDLE_EXIT:
+        if OWNER[0] and SEEN_HUB[0] and (time.time() - TOOLS_AT) > IDLE_EXIT:
             print("universal-hub bridge: hub gone for %ds, stopping" % IDLE_EXIT,
                   file=sys.stderr)
             STOP.set()
             return
 
 
+def self_update():
+    """Fetch the published bridge and keep it for next launch, if it moved.
+
+    Written, not executed. Replacing the file under a running session and
+    re-exec'ing would drop the client's connection mid-conversation to fix
+    something that is not yet broken -- so the new copy is put in place and
+    starts being used the next time the client launches it, which it does
+    every session anyway.
+
+    Set UHUB_MCP_NO_UPDATE to keep a copy you are editing.
+    """
+    if os.environ.get("UHUB_MCP_NO_UPDATE"):
+        return
+    try:
+        with urllib.request.urlopen(RAW, timeout=10) as r:
+            new = r.read()
+    except (urllib.error.URLError, OSError, ValueError):
+        return  # offline is not an error worth saying anything about
+    # It has to look like this program before it is allowed to become it.
+    if len(new) < 4000 or b"universal-hub bridge" not in new:
+        return
+    here = os.path.abspath(__file__)
+    try:
+        if open(here, "rb").read() == new:
+            return
+        with open(here, "wb") as f:
+            f.write(new)
+    except OSError:
+        return
+    print("universal-hub bridge: a newer bridge was published and has been "
+          "written to %s -- it takes effect next time your client starts it"
+          % here, file=sys.stderr)
+
+
+def bind():
+    """The port, or None when another copy of this file already has it."""
+    try:
+        return ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
+    except OSError as e:
+        # 48 on BSD/macOS, 98 on Linux, 10048 on Windows.
+        if e.errno in (48, 98, 10048):
+            return None
+        raise
+
+
 def main():
-    srv = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
-    threading.Thread(target=srv.serve_forever, daemon=True).start()
-    threading.Thread(target=watchdog, daemon=True).start()
-    threading.Thread(target=lambda: (STOP.wait(), srv.shutdown()), daemon=True).start()
-    # Never print to stdout here -- it is the protocol channel.
-    print("universal-hub bridge: MCP on stdio, hub queue on 127.0.0.1:%d" % PORT,
-          file=sys.stderr)
+    srv = bind()
+    if srv:
+        OWNER[0] = True
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        threading.Thread(target=watchdog, daemon=True).start()
+        threading.Thread(target=lambda: (STOP.wait(), srv.shutdown()),
+                         daemon=True).start()
+        # Never print to stdout here -- it is the protocol channel.
+        print("universal-hub bridge: %s, MCP on stdio, hub queue on "
+              "127.0.0.1:%d" % (VERSION, PORT), file=sys.stderr)
+        # Only the owner checks: every client spawns a copy, and three of
+        # them fetching the same file on every launch is noise.
+        threading.Thread(target=self_update, daemon=True).start()
+    else:
+        # Another copy owns the queue. Serve this client by forwarding to
+        # it, rather than exiting -- which is what the client sees as
+        # "Connection closed".
+        print("universal-hub bridge: another bridge holds 127.0.0.1:%d, "
+              "forwarding to it" % PORT, file=sys.stderr)
     try:
         serve_stdio()
         # stdin ended. Launched by an MCP client that means the client is
