@@ -37,6 +37,9 @@ say("request(): " .. typeof(send))
 if typeof(send) == "function" then
     -- Two independent echo servers, because one of them agreeing with a
     -- theory is not evidence.
+    -- postman-echo.com/put ONLY answers PUT, so its status code is the
+    -- answer on its own: 200 means a real PUT arrived, 4xx means something
+    -- else did. That works even on a server that does not echo the method.
     for _, ep in ipairs({ "https://httpbin.org/anything", "https://postman-echo.com/put" }) do
         local ok, r = pcall(send, {
             Url = ep, Method = "PUT",
@@ -46,9 +49,11 @@ if typeof(send) == "function" then
             say("PUT " .. ep .. " -> threw: " .. tostring(r):sub(1, 70))
         else
             local body = tostring((type(r) == "table" and (r.Body or r.body)) or "")
+            local code = type(r) == "table"
+                         and (r.StatusCode or r.Status or r.status_code) or "?"
             local saw = body:match('"method"%s*:%s*"(%w+)"')
-                     or body:match('"url"%s*:%s*"[^"]*"') and "(no method field)"
-            say("PUT " .. ep .. " -> server saw: " .. tostring(saw or body:sub(1, 60)))
+            say("PUT " .. ep .. " -> HTTP " .. tostring(code)
+                .. (saw and ("  server saw: " .. saw) or "  (no method echoed)"))
         end
     end
 end
