@@ -39,7 +39,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 PORT = 8421
 PROTOCOL = "2024-11-05"
-VERSION = "1.3"
+VERSION = "1.4"
 RAW = ("https://raw.githubusercontent.com/Angxers2/Unihubreborn/main/"
        "tools/mcp_bridge.py")
 
@@ -198,6 +198,41 @@ class Handler(BaseHTTPRequestHandler):
             # !mcp off, said directly rather than waited out.
             self._send({"ok": True})
             STOP.set()
+            return
+
+        if path == "/spotify":
+            # Some executors -- MacSploit is one -- rewrite PUT as POST on
+            # the wire. Spotify answers 405 to every play, pause, volume and
+            # like as a result, and no header talks it out of that. Python's
+            # PUT is a PUT, so the hub hands the request here instead.
+            #
+            # Deliberately Spotify-only: a general relay on a loopback port
+            # is an SSRF hole, and this needs exactly one host.
+            d = self._read()
+            p = str(d.get("path") or "")
+            method = str(d.get("method") or "GET").upper()
+            if not p.startswith("/") or method not in ("PUT", "DELETE", "POST", "GET"):
+                self.send_error(400, "bad relay request")
+                return
+            body = d.get("body")
+            req = urllib.request.Request(
+                "https://api.spotify.com/v1" + p,
+                data=body.encode("utf8") if isinstance(body, str) else None,
+                method=method,
+                headers={"Authorization": str(d.get("auth") or ""),
+                         "Content-Type": "application/json"},
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=15) as r:
+                    self._send({"code": r.status,
+                                "body": r.read().decode("utf8", "replace")})
+            except urllib.error.HTTPError as e:
+                # Spotify's own 4xx is an answer, not a failure -- the hub
+                # reads its message and shows it.
+                self._send({"code": e.code,
+                            "body": e.read().decode("utf8", "replace")})
+            except Exception as e:  # noqa: BLE001  (network, any reason)
+                self._send({"code": 0, "body": str(e)[:200]})
             return
 
         if path == "/call":
