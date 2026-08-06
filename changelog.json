@@ -39,7 +39,11 @@
         "Volume is a real control -- a slider on the time row and a speaker that fades toward mute -- where before there was none at all.",
         "\"No active device\" is no longer the end of the answer. Spotify says that about a desktop app that has merely gone idle or a phone with the screen off, and naming the device in the request wakes it. Play, pause, skip, seek, volume, shuffle, repeat and queue all do that now, so the card works when Spotify is not already open and on screen -- which is what made it look like it only worked from inside its own panel.",
         "An executor that rewrites PUT as POST is detected and said out loud. MacSploit does this, and Spotify answers 405 to every play, pause, volume and like as a result -- which the card reported as 'That did not work', as if it were your fault or Spotify's. It is neither, so it now says which it is, and routes those calls through the MCP bridge when one is running, since a real PUT leaves that process intact.",
-        "Connecting can be nothing but a pasted access token. The Client ID and the authorise round trip are still there and still the way to a connection that never expires, but they are no longer the price of trying it once."
+        "Connecting can be nothing but a pasted access token. The Client ID and the authorise round trip are still there and still the way to a connection that never expires, but they are no longer the price of trying it once.",
+        "Volume sits with the transport now, right of repeat, rather than adrift in the row below it -- it is a playback control, so it belongs with the playback controls.",
+        "Every slider has a handle. A three-pixel bar reads as something being reported to you rather than something you can take hold of, and that is true of the scrubber, the volume and all six aim settings at once.",
+        "The aim key is yours to choose. Right mouse is a fine default and a poor requirement -- it is the camera in plenty of games, and a phone has no such button -- so the panel now takes whichever input you press, and keeps it.",
+        "When an executor sends a request Spotify will not accept, the card says so in words instead of reporting that it did not work, and names what still does. It no longer asks a bridge that is not running, which was costing a pause on every press for everybody who has never run one."
       ]
     },
     {
