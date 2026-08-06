@@ -53,7 +53,9 @@
         "The Spotify panel could get stuck where it would not drag. Every drag starts a per-frame loop that writes the panel's position, and it was never stopped -- so one left over from a rebuild sat there pinning the panel to where it used to be while you tried to move it. The same leak was in every floating panel and the workspace editor; the activity card and the script hub had always done it right.",
         "The startup chime belongs to startup. !overview opens the same screen, so reopening it played the arrival sound again -- a sound that says the hub has just landed, said at a moment when it plainly has not.",
         "The overview shows what is playing, when something is. Cover, track, artist and the device it is on, with a button that pauses it -- or opens the card instead, on an executor that cannot pause.",
-        "Friends in the overview are ones you can actually go to. Someone sitting on the website or in the app filled the same two slots every time while friends who were in a game went unshown; they are now kept only when nobody is in a game at all, which is the case where knowing somebody is around is still worth a row."
+        "Friends in the overview are ones you can actually go to. Someone sitting on the website or in the app filled the same two slots every time while friends who were in a game went unshown; they are now kept only when nobody is in a game at all, which is the case where knowing somebody is around is still worth a row.",
+        "The now-playing row shows the album cover. It only used one already cached, which at startup is never -- so it drew the disc glyph every time. The slot is shaped up front and the cover fills it whenever the download lands, which moves nothing.",
+        "Three friends in the overview rather than two. The column had room for another and was ending short."
       ]
     },
     {
