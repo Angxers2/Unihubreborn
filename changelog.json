@@ -33,7 +33,8 @@
         "The bridge updates itself atomically and refuses a publish that does not compile. It wrote over itself in place, so an interruption mid-write left half a file and a client that only ever said 'Connection closed'.",
         "Every bridge endpoint now checks the Host header, which is the standard guard against a page reaching loopback under a name the browser trusts. A late answer to a call that already timed out is dropped rather than kept forever, and a job queued before the game dropped is discarded rather than run minutes later in a different server.",
         "An approval prompt that nobody answered says so, rather than reporting that the user declined.",
-        "The card for code the model is running says Running code, and the friend tag in the overview is a small outlined label in the corner like the player count, rather than a filled pill sat on the artwork."
+        "The card for code the model is running says Running code, and the friend tag in the overview is a small outlined label in the corner like the player count, rather than a filled pill sat on the artwork.",
+        "Everything new works on a phone. MouseEnter never fires on touch, so the quick actions on a name and the delete on a conversation -- both hover-only -- did not exist there; they are simply present on touch now, at a size a finger can hit, with the chips after them starting past them rather than underneath. And floating panels are scaled to the screen the way the modals always were, which nothing had needed while the widest was 470 and the AI panel is 720 -- wider than a phone held upright. Its conversation rail starts closed there, since it would otherwise be most of the width."
       ]
     },
     {
