@@ -55,7 +55,8 @@
         "The overview shows what is playing, when something is. Cover, track, artist and the device it is on, with a button that pauses it -- or opens the card instead, on an executor that cannot pause.",
         "Friends in the overview are ones you can actually go to. Someone sitting on the website or in the app filled the same two slots every time while friends who were in a game went unshown; they are now kept only when nobody is in a game at all, which is the case where knowing somebody is around is still worth a row.",
         "The now-playing row shows the album cover. It only used one already cached, which at startup is never -- so it drew the disc glyph every time. The slot is shaped up front and the cover fills it whenever the download lands, which moves nothing.",
-        "Three friends in the overview rather than two. The column had room for another and was ending short."
+        "Three friends in the overview rather than two. The column had room for another and was ending short.",
+        "!antifling actually works. It cleared collisions once per character and then only for parts that arrived afterwards -- clever, and the reason it did nothing: the Humanoid turns CanCollide back on continuously, and nothing was watching for that. Measured in a live server, two limbs were collidable again within a second and a half of being cleared. It now re-applies every frame the way Infinite Yield does, but from a cached list and only when a part is not already clear: 471 frames of it cost 12 property writes where IY's approach would have cost 8,007."
       ]
     },
     {
