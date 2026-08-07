@@ -39,7 +39,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 PORT = 8421
 PROTOCOL = "2024-11-05"
-VERSION = "1.4"
+VERSION = "1.5"
 RAW = ("https://raw.githubusercontent.com/Angxers2/Unihubreborn/main/"
        "tools/mcp_bridge.py")
 
@@ -377,22 +377,154 @@ def take_over() -> bool:
     return True
 
 
+# ── the one tool the game cannot do ─────────────────────────────────────
+# Roblox will not give a client script a picture of itself. CaptureService
+# hands back an rbxtemp:// id whose bytes no client API can read, several
+# executors refuse the call outright as a "malicious function", and Infinite
+# Yield's screenshot command just asks Roblox to save one to the user's
+# Pictures folder -- nothing comes back to the script either way.
+#
+# The bridge is a native process looking at the same screen, so it takes the
+# picture here instead. This never touches the game, and the model gets a
+# real image rather than a description of one.
+SHOT_TOOL = {
+    "name": "screenshot",
+    "description": (
+        "Take a picture of the screen the game is running on and return it as "
+        "an image. Use it to SEE what is happening -- the UI, where the "
+        "character is, what a menu says -- when the text tools cannot answer. "
+        "This captures the whole display, not just Roblox, so treat it the way "
+        "you would treat looking over somebody's shoulder."),
+    "inputSchema": {
+        "type": "object",
+        "properties": {
+            "width": {"type": "number",
+                      "description": "Longest edge in pixels, 320-1920. Default 1280."},
+            "why": {"type": "string",
+                    "description": "One line the user sees in-game saying what "
+                                   "you are looking for."},
+        },
+    },
+}
+
+
+def _shot_file(path: str, width: int) -> str:
+    """Capture the screen to `path` as JPEG. Returns '' on success, else why."""
+    import shutil
+    import subprocess
+    # Coerced, not trusted. A model that passes "1280" or "big" should get a
+    # screenshot, not a stack trace about int().
+    try:
+        px = int(float(width))
+    except (TypeError, ValueError):
+        px = 1280
+    w = str(max(320, min(1920, px)))
+
+    if sys.platform == "darwin":
+        raw = path + ".png"
+        # -x: no shutter sound. Taking a picture is quiet enough already
+        # without announcing it to whoever is in the room.
+        r = subprocess.run(["screencapture", "-x", "-t", "png", raw],
+                           capture_output=True, timeout=20)
+        if r.returncode != 0 or not os.path.exists(raw):
+            return "screencapture failed: " + r.stderr.decode()[:120]
+        # Down to something a model can look at without a megabyte of base64
+        # travelling for every glance.
+        subprocess.run(["sips", "-Z", w, "-s", "format", "jpeg",
+                        "-s", "formatOptions", "70", raw, "--out", path],
+                       capture_output=True, timeout=20)
+        try:
+            os.remove(raw)
+        except OSError:
+            pass
+        return "" if os.path.exists(path) else "sips produced nothing"
+
+    if sys.platform.startswith("win"):
+        ps = (
+            "Add-Type -AssemblyName System.Windows.Forms,System.Drawing;"
+            "$b=[System.Windows.Forms.Screen]::PrimaryScreen.Bounds;"
+            "$bmp=New-Object System.Drawing.Bitmap $b.Width,$b.Height;"
+            "$g=[System.Drawing.Graphics]::FromImage($bmp);"
+            "$g.CopyFromScreen($b.Location,[System.Drawing.Point]::Empty,$b.Size);"
+            "$sc=%s/[double]$b.Width; if($sc -gt 1){$sc=1};"
+            "$nw=[int]($b.Width*$sc); $nh=[int]($b.Height*$sc);"
+            "$out=New-Object System.Drawing.Bitmap $nw,$nh;"
+            "$g2=[System.Drawing.Graphics]::FromImage($out);"
+            "$g2.InterpolationMode='HighQualityBicubic';"
+            "$g2.DrawImage($bmp,0,0,$nw,$nh);"
+            "$c=[System.Drawing.Imaging.ImageCodecInfo]::GetImageEncoders()|"
+            "Where-Object{$_.MimeType -eq 'image/jpeg'};"
+            "$p=New-Object System.Drawing.Imaging.EncoderParameters 1;"
+            "$p.Param[0]=New-Object System.Drawing.Imaging.EncoderParameter "
+            "([System.Drawing.Imaging.Encoder]::Quality,70);"
+            "$out.Save('%s',$c,$p);"
+        ) % (w, path.replace("\\", "\\\\"))
+        r = subprocess.run(["powershell", "-NoProfile", "-Command", ps],
+                           capture_output=True, timeout=30)
+        if not os.path.exists(path):
+            return "powershell capture failed: " + r.stderr.decode()[:120]
+        return ""
+
+    # Linux: whichever of these is installed. grim is Wayland, the rest X11.
+    for cmd in (["grim", path], ["scrot", "-o", path],
+                ["import", "-window", "root", path],
+                ["gnome-screenshot", "-f", path]):
+        if shutil.which(cmd[0]):
+            subprocess.run(cmd, capture_output=True, timeout=20)
+            if os.path.exists(path):
+                return ""
+    return ("no screenshot tool found -- install grim, scrot, imagemagick or "
+            "gnome-screenshot")
+
+
+def take_shot(args: dict) -> tuple[str, str]:
+    """Returns (base64_jpeg, '') or ('', why_it_failed)."""
+    import base64
+    import tempfile
+    fd, path = tempfile.mkstemp(suffix=".jpg")
+    os.close(fd)
+    try:
+        why = _shot_file(path, args.get("width") or 1280)
+        if why:
+            return "", why
+        with open(path, "rb") as f:
+            raw = f.read()
+        if not raw:
+            return "", "the capture came back empty"
+        return base64.b64encode(raw).decode("ascii"), ""
+    except Exception as e:  # noqa: BLE001  (a screenshot must never take the bridge down)
+        return "", "%s: %s" % (type(e).__name__, str(e)[:120])
+    finally:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+
+
 def list_tools() -> list:
     if OWNER[0]:
         with LOCK:
-            return list(TOOLS)
+            # The screenshot is ours, not the hub's, so it is offered even
+            # while the game is still connecting -- looking at the screen is
+            # exactly what you want when the game is not answering.
+            return list(TOOLS) + [SHOT_TOOL]
     try:
-        return ask_owner("/tools", timeout=5).get("tools") or []
+        return (ask_owner("/tools", timeout=5).get("tools") or []) + [SHOT_TOOL]
     except (urllib.error.URLError, OSError, ValueError):
         # The owner went away mid-session. Becoming it is better than
         # reporting an empty toolbox for the rest of this one.
         if take_over():
             with LOCK:
-                return list(TOOLS)
-        return []
+                return list(TOOLS) + [SHOT_TOOL]
+        return [SHOT_TOOL]
 
 
 def run_tool(name: str, args: dict) -> tuple[str, bool]:
+    if name == "screenshot":
+        # Handled here, never queued: the game has no way to take one, and
+        # forwarding it would just time out against a tool the hub does not
+        # have. rpc() picks the image up separately.
+        return ("screenshot", False)
     if OWNER[0]:
         return call_tool(name, args)
     try:
@@ -451,7 +583,38 @@ def rpc(msg: dict):
 
     if method == "tools/call":
         p = msg.get("params") or {}
-        text, bad = run_tool(p.get("name") or "", p.get("arguments") or {})
+        name = p.get("name") or ""
+        args = p.get("arguments") or {}
+
+        if name == "screenshot":
+            b64, why = take_shot(args)
+            if why:
+                return {"jsonrpc": "2.0", "id": mid,
+                        "result": {"content": [{"type": "text",
+                                                "text": "No screenshot: " + why}],
+                                   "isError": True}}
+            # Say so in the game. A picture of somebody's screen is taken
+            # WITH them, not of them, and the notification is the difference.
+            why_txt = str(args.get("why") or "")[:120]
+            def _tell():
+                # Best effort: the picture has already been taken, and a hub
+                # that is not there must not turn that into an error.
+                try:
+                    call_tool("notify", {
+                        "title": "Screenshot",
+                        "text": why_txt or "The model looked at your screen",
+                        "kind": "info",
+                    })
+                except Exception:  # noqa: BLE001
+                    pass
+
+            threading.Thread(target=_tell, daemon=True).start()
+            return {"jsonrpc": "2.0", "id": mid,
+                    "result": {"content": [{"type": "image", "data": b64,
+                                            "mimeType": "image/jpeg"}],
+                               "isError": False}}
+
+        text, bad = run_tool(name, args)
         return {
             "jsonrpc": "2.0", "id": mid,
             "result": {"content": [{"type": "text", "text": text}],
