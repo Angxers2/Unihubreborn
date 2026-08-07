@@ -67,7 +67,9 @@
         "!mcpinfo says what the far end is connected to, what it may reach for, whether it asks first, how many calls it has made and what it did lately -- the question people actually have about this feature, which is 'is it on, and what can it do to me'.",
         "!mcpsettings decides what an outside model may touch, in five groups rather than twenty tick boxes: reading the game, running commands and code, speaking in chat, Spotify and translation, and waiting or watching in the background. A group that is off is taken out of the list AND refused if something calls it anyway -- a list is a menu, not a lock.",
         "Full auto, behind the same dialog the config wipe uses: a countdown, a dead button, and six lines saying exactly what it means. It lets an outside model run anything without a prompt, and it is deliberately never saved -- it lasts the session, so nobody comes back to a hub already in it.",
-        "And a switch for whether tool calls put a toast on screen, for when you are watching it work and do not need telling each time."
+        "And a switch for whether tool calls put a toast on screen, for when you are watching it work and do not need telling each time.",
+        "The MCP settings look like the rest of the hub. The rows were hand-rolled without a glyph and read as a different product sitting inside the same one; they are the ESP panel's row now -- accent icon, label, description under it, switch on the right -- and each scope carries its own mark.",
+        "Four new icons, and a tool that adds them. The interface ships around a hundred Lucide icons rendered white at 64x64, and matching that by hand is easy to get subtly wrong -- a different stroke weight reads as a different icon set. tools/add_icon.py fetches and renders one properly, and can re-render an existing icon to prove it still matches."
       ]
     },
     {
