@@ -39,7 +39,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 PORT = 8421
 PROTOCOL = "2024-11-05"
-VERSION = "1.5"
+VERSION = "1.6"
 RAW = ("https://raw.githubusercontent.com/Angxers2/Unihubreborn/main/"
        "tools/mcp_bridge.py")
 
@@ -319,10 +319,20 @@ def call_tool(name: str, args: dict) -> tuple[str, bool]:
 
 # ── proxy side: another copy holds the port ─────────────────────────────
 def say(msg: dict):
-    """One JSON line on stdout, under the lock that keeps them whole."""
-    with OUT_LOCK:
-        sys.stdout.write(json.dumps(msg) + "\n")
-        sys.stdout.flush()
+    """One JSON line on stdout, under the lock that keeps them whole.
+
+    Never raises. This is called from the HTTP threads as well as the MCP
+    one, and when no client is attached -- the bridge serving the hub queue
+    on its own -- stdout is a closed pipe. That was killing the /poll thread
+    with a BrokenPipeError traceback the moment the hub's tools first
+    arrived, because that is when the listChanged notice goes out.
+    """
+    try:
+        with OUT_LOCK:
+            sys.stdout.write(json.dumps(msg) + "\n")
+            sys.stdout.flush()
+    except (BrokenPipeError, ValueError, OSError):
+        pass
 
 
 def notify_list_changed():
@@ -687,6 +697,18 @@ def self_update():
     except (SyntaxError, ValueError):
         print("universal-hub bridge: the published bridge does not compile, "
               "keeping this one", file=sys.stderr)
+        return
+    # ...and it has to be NEWER. raw.githubusercontent serves the previous
+    # copy for a minute or so after a push, so writing whatever it returns
+    # means a fresh install can be quietly rolled BACK to the version it
+    # just replaced -- which is exactly what happened to 1.5.
+    import re as _re
+    m = _re.search(rb'^VERSION = "([0-9.]+)"', new, _re.M)
+    if not m:
+        return
+    def _v(t):
+        return tuple(int(x) for x in t.split(".") if x.isdigit())
+    if _v(m.group(1).decode()) <= _v(VERSION):
         return
     here = os.path.abspath(__file__)
     try:

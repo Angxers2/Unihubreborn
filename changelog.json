@@ -69,7 +69,9 @@
         "Full auto, behind the same dialog the config wipe uses: a countdown, a dead button, and six lines saying exactly what it means. It lets an outside model run anything without a prompt, and it is deliberately never saved -- it lasts the session, so nobody comes back to a hub already in it.",
         "And a switch for whether tool calls put a toast on screen, for when you are watching it work and do not need telling each time.",
         "The MCP settings look like the rest of the hub. The rows were hand-rolled without a glyph and read as a different product sitting inside the same one; they are the ESP panel's row now -- accent icon, label, description under it, switch on the right -- and each scope carries its own mark.",
-        "Four new icons, and a tool that adds them. The interface ships around a hundred Lucide icons rendered white at 64x64, and matching that by hand is easy to get subtly wrong -- a different stroke weight reads as a different icon set. tools/add_icon.py fetches and renders one properly, and can re-render an existing icon to prove it still matches."
+        "Four new icons, and a tool that adds them. The interface ships around a hundred Lucide icons rendered white at 64x64, and matching that by hand is easy to get subtly wrong -- a different stroke weight reads as a different icon set. tools/add_icon.py fetches and renders one properly, and can re-render an existing icon to prove it still matches.",
+        "The MCP bridge stopped killing itself. It writes a line to its client whenever the toolbox changes, and that write also happens on the thread the game polls -- so with no client attached, the pipe was closed and the first successful poll died with it. It cannot raise there any more.",
+        "And it stopped downgrading itself. It kept the published copy for next launch whenever that copy DIFFERED, and GitHub serves the previous file for a minute or so after a push -- so a bridge could quietly be rolled back to the version it had just replaced. It only moves forward now."
       ]
     },
     {
