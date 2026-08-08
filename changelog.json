@@ -1,6 +1,29 @@
 {
-  "version": "2.3.5",
+  "version": "2.3.6",
   "entries": [
+    {
+      "version": "2.3.6",
+      "date": "8 August 2026",
+      "title": "Nametags, and a messenger",
+      "notes": [
+        "!antiragdoll keeps you on your feet. Games ragdoll you four different ways and stopping one of them is not stopping any of them, so this holds the humanoid's states, its platform-stand and the joints themselves -- and stands down while you are flying or seated rather than fighting whatever put you there.",
+        "Nametags. Anybody else running the hub in your server gets a small tag above them: their face, their name, how long they have been a hub user, and the hub's mark -- drawn in THEIR theme, so somebody on red reads as red. One fixed size with a distance cap, so a crowded server does not turn into a wall of cards. Hover one for view, teleport, profile and chat.",
+        "A Roblox client cannot read another client's script state, so the tags go through a relay -- and it was built not to be able to read what it holds. What it stores is a digest of the place and server id pointing at encrypted bytes; it never learns which game anybody is in, who they are, or what any message says.",
+        "Private messages between hub users. Sealed on your machine and opened on theirs, so the relay and anyone who takes that server sees bytes. Stated plainly on the screen where you type: it does NOT protect you from another script on your own machine, because the key has to live in the executor's config.",
+        "Messaging asks first. A first approach is a request the other person accepts or blocks, because a mailbox address can be worked out from a user id -- consent is the thing stopping anyone writing to anyone. Blocks last across restarts, and both people asking at once is treated as agreement rather than two prompts.",
+        "!chats is a proper chat system: a draggable window that collapses to a puck and remembers where you left it, a list of every conversation with unread counts, message bubbles with real Roblox headshots, and an emoji picker -- Roblox has no emoji keyboard and the operating system's does not reach a game text box.",
+        "Group chats. Each group gets its own key, made once and handed to every member inside an envelope sealed to them alone; messages go out sealed with it to each member's mailbox. The relay learns nothing new -- a shared group mailbox would have meant telling it who is in the room. Add people, rename it, and see who said what.",
+        "Messages reach anyone, anywhere. Message a hub user by their Roblox username whether or not they are in your server or even online -- anything sent while they are away waits in their mailbox and arrives when they next execute. If they have never run the hub it says so rather than sending into the void.",
+        "Online status. A green or grey dot on every conversation, and the header saying online or last seen 5m ago, with 'messages will wait' when they are away. The relay only remembers when a mailbox last checked in.",
+        "A request waits up to 7 days, shows greyed out with its countdown, and then expires -- a question nobody answered in a week is not still being considered.",
+        "Chat settings, in the chat window: message notifications on or off, message requests on or off, and the blocked list with unblock a tap away.",
+        "Catch up. The first mail sweep after you execute tells you what arrived while you were gone in one line rather than a toast per message, and the overview shows a catch-up card when messages are waiting.",
+        "Show my own tag, in nametag settings. Your tag above your own head, built from what the hub actually publishes about you, so it is what everybody else sees rather than a mock-up of it.",
+        "The Spotify card no longer opens itself. It used to reappear whenever music started AND on every track change -- closing it only bought you until the next song. It stays shut until you open it and remembers that; !spotify auto turns the old behaviour back on.",
+        "Infinite Yield's chat command is now say, which was already its alias -- with a messenger in the hub, chat read as the wrong thing. chat still works, so nothing that used it breaks.",
+        "Theme changes reach other people's screens straight away instead of after ten or fifteen seconds. A change is pushed the moment it happens, coalesced so flicking through the picker is one update rather than ten."
+      ]
+    },
     {
       "version": "2.3.5",
       "date": "5 August 2026",
@@ -71,16 +94,7 @@
         "The MCP settings look like the rest of the hub. The rows were hand-rolled without a glyph and read as a different product sitting inside the same one; they are the ESP panel's row now -- accent icon, label, description under it, switch on the right -- and each scope carries its own mark.",
         "Four new icons, and a tool that adds them. The interface ships around a hundred Lucide icons rendered white at 64x64, and matching that by hand is easy to get subtly wrong -- a different stroke weight reads as a different icon set. tools/add_icon.py fetches and renders one properly, and can re-render an existing icon to prove it still matches.",
         "The MCP bridge stopped killing itself. It writes a line to its client whenever the toolbox changes, and that write also happens on the thread the game polls -- so with no client attached, the pipe was closed and the first successful poll died with it. It cannot raise there any more.",
-        "And it stopped downgrading itself. It kept the published copy for next launch whenever that copy DIFFERED, and GitHub serves the previous file for a minute or so after a push -- so a bridge could quietly be rolled back to the version it had just replaced. It only moves forward now.",
-        "!antiragdoll keeps you on your feet. Games ragdoll you four different ways and stopping one leaves the other three, so all four are handled: the humanoid states that allow it are disabled and any that gets forced is stood back up, PlatformStand is held down where it changes, the joints are re-enabled every frame because that flag does not stay where it is put, and the ball sockets a thorough ragdoll swaps in are removed as they appear. It steps aside while you fly or sit, since fly sets PlatformStand on purpose -- and !unantiragdoll gives the states back, so you can still fall over in a game that wants you to.",
-        "Nametags. Other people running the hub in your server get a small tag above them -- their face, their name, how long they have been a user, and the U mark in THEIR theme, so somebody on the red theme reads as red. Hovering opens view, goto, profile and a private message; a tag that appears while you are standing there fades in, and somebody switching theme transitions rather than blinking.",
-        "A Roblox client cannot read another client's script state, so this goes through a relay -- and the relay is built so it learns almost nothing. It never receives the game or the server, only a digest of them, and the payload beside it is sealed with a key derived from the server id, which everyone standing in that server already knows and the relay never sees. A dump of that machine yields no usernames, no games and no themes.",
-        "Private messages between hub users, sealed before they leave and opened when they arrive. Being explicit about what that buys: it keeps out the relay and anyone who takes that server -- it does NOT keep out another script running on your own machine, because the key lives in a config file any of them can read. The dialog says exactly that, on the screen where you type.",
-        "Chat withdraws itself rather than feeling broken. The cost of encrypting a message is measured on your machine at startup, and on an executor too slow for it the action is not offered at all and says why. Nametags and presence still work there -- they cost one small seal every thirty seconds.",
-        "!nametags opens a dialog for all three switches, !dm messages somebody, and the hub stops announcing you the moment it unloads.",
-        "The nametag settings drew its icons on top of its own labels. The glyph was a child of the row while the text was a child of the panel, so the two were measured from different origins and overlapped by exactly the row's inset. And the third switch was missing entirely, because private messages had been written into a table the chat log already owned -- the log's own assignment replaced it wholesale, taking every function with it. Both halves existed, which is why neither check caught it; the build guard now refuses a module that is assigned a fresh table twice.",
-        "Messaging asks first. A first approach is a request the other person accepts or blocks, and only an agreed pair can exchange anything -- a mailbox address can be worked out from a user id, so without that step anyone could write to anyone. Blocks are remembered across restarts, since a block that forgets itself is a mute until next launch.",
-        "A theme change shows up on other people's screens straight away instead of after ten or fifteen seconds. It used to wait out the rest of a heartbeat here and then another one there; it now pushes on the change, coalesced so flicking through the picker is one update rather than ten."
+        "And it stopped downgrading itself. It kept the published copy for next launch whenever that copy DIFFERED, and GitHub serves the previous file for a minute or so after a push -- so a bridge could quietly be rolled back to the version it had just replaced. It only moves forward now."
       ]
     },
     {
