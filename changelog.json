@@ -1,6 +1,14 @@
 {
-  "version": "2.3.6",
+  "version": "2.3.7",
   "entries": [
+    {
+      "version": "2.3.7",
+      "date": "8 August 2026",
+      "title": "Seeing each other through walls",
+      "notes": [
+        "Hub users get an outline in their own theme colour when something is between you and them, and it fades away as soon as you can see them properly -- so it reads as depth on the nametag rather than as ESP left switched on. Outline only, no fill, and deliberately not solid: it is a note that somebody is over there, not a way to fight through a wall. Switchable in nametag settings."
+      ]
+    },
     {
       "version": "2.3.6",
       "date": "8 August 2026",
