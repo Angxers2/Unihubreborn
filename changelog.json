@@ -6,7 +6,13 @@
       "date": "8 August 2026",
       "title": "Seeing each other through walls",
       "notes": [
-        "Hub users get an outline in their own theme colour when something is between you and them, and it fades away as soon as you can see them properly -- so it reads as depth on the nametag rather than as ESP left switched on. Outline only, no fill, and deliberately not solid: it is a note that somebody is over there, not a way to fight through a wall. Switchable in nametag settings."
+        "Hub users get an outline in their own theme colour when something is between you and them, and it fades away as soon as you can see them properly -- so it reads as depth on the nametag rather than as ESP left switched on. Outline only, no fill, and deliberately not solid: it is a note that somebody is over there, not a way to fight through a wall. Switchable in nametag settings.",
+        "Chats survive a reload now. The local transcript is sealed before it is written to config, kept to a bounded recent history, and can be deleted from the conversation header without blocking the person. Deleting a group removes the group and its saved history from this device.",
+        "Cross-server first contact works. A request from somebody the client has never seen can be opened without already knowing their id, and every sealed envelope carries the sender's Roblox name so messages and notifications no longer fall back to 'user' followed by a number when they are in another server.",
+        "Compose shows the Universal Hub users currently visible in this server, with their faces and request state, while Find by username remains available for somebody elsewhere. Messages can carry inline join-game, server, player, position and direct Tenor/Giphy GIF cards.",
+        "Pick up where you left off can reopen this game's complete floating workspace: Chats, ESP, Aim, sUNC, Translate, AI, Files, Spotify and Script Hub, including panel positions, minimized states and the open file-browser path. The workspace is keyed strictly by PlaceId and is never offered in a different game; Aim and ESP settings, colours and binds continue to persist as settings.",
+        "Windows command results no longer overlap or leap to the bottom while the list is rebuilding. Aliases and descriptions have bounded rows, a stationary pointer cannot select a newly-created result underneath it, zero-size first-layout frames cannot scroll, and rebuilt lists discard elastic wheel momentum.",
+        "Minimized floating panels now use a compact accent gradient, themed border and clear white mark instead of a plain dark square. The minimum glass opacity also keeps bright game text from bleeding through and looking like a broken draw order."
       ]
     },
     {
