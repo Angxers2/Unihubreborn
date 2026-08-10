@@ -3,7 +3,7 @@
   "entries": [
     {
       "version": "2.3.7",
-      "date": "8 August 2026",
+      "date": "10 August 2026",
       "title": "Seeing each other through walls",
       "notes": [
         "Hub users get an outline in their own theme colour when something is between you and them, and it fades away as soon as you can see them properly -- so it reads as depth on the nametag rather than as ESP left switched on. Outline only, no fill, and deliberately not solid: it is a note that somebody is over there, not a way to fight through a wall. Switchable in nametag settings.",
@@ -15,7 +15,13 @@
         "Direct-chat headers now keep Delete history beside Remove conversation and Block. Every conversation carries a visible encrypted banner, the emoji picker has 48 choices, and Chat settings can explicitly ignore only the executor encryption speed limit while keeping message sealing and HTTP requirements intact.",
         "Pick up where you left off can reopen this game's complete floating workspace: Chats, ESP, Aim, sUNC, Translate, AI, Files, Spotify and Script Hub, including panel positions, minimized states and the open file-browser path. The workspace is keyed strictly by PlaceId and is never offered in a different game; Aim and ESP settings, colours and binds continue to persist as settings.",
         "Windows command results no longer overlap or leap to the bottom while the list is rebuilding. Command names stay compact with aliases measured directly beside them; hovering a command, or selecting it with either arrow key, expands that row neatly for its description and moves the rows below it. A stationary pointer cannot select a newly-created result underneath it, zero-size first-layout frames cannot scroll, and rebuilt lists discard elastic wheel momentum.",
-        "Minimized floating panels now use a compact accent gradient, themed border and clear white mark instead of a plain dark square. The minimum glass opacity also keeps bright game text from bleeding through and looking like a broken draw order."
+        "Minimized floating panels are now wider translucent status cards instead of anonymous squares. They keep the panel icon, name and a useful live readout visible; Chats adds a red unread badge, and opening a panel that is already parked restores that existing window instead of hiding or duplicating it. The minimum glass opacity also keeps bright game text from bleeding through and looking like a broken draw order.",
+        "Floating windows are clamped by their complete scaled bounds, including positions restored from an older workspace, so their controls cannot be stranded outside the screen. Modals re-fit and re-centre when the Windows viewport or DPI changes, and destroyed panels release their resize listeners.",
+        "Direct chats now negotiate persistent X25519 identity keys instead of deriving live message keys from public Roblox ids. The conversation header carries a safety code both people can compare, established peer keys are pinned, ordinary and group-invite traffic refuses to send before a secure exchange, and older sealed history remains readable locally without allowing the legacy key onto the network.",
+        "Unload and Stop all now retire infinite jump, anti-idle, anti-lag, FPS-boost, ad-removal, bang and teleport-persistence listeners. Repeating those commands replaces the prior watcher instead of stacking another, and removeads performs one initial pass followed by incremental checks rather than rescanning the entire Workspace forever.",
+        "Cached startup is shorter, unsupported filesystems skip impossible retries, icon asset ids are cached, and command autocomplete coalesces same-frame edits while bounding its rendered result rows. Activity now consumes the central deduplicated chat feed instead of installing a second set of chat listeners.",
+        "The built-in third-party command shortcuts are pinned to immutable GitHub commits and checked against embedded SHA-256 digests before compilation. SystemBroken is disabled with a clear explanation because its upstream repository is unavailable rather than falling back to an unverified copy.",
+        "Drawers, modals, floating panels, minimized launchers, sliders and shared action buttons now use short, consistent ease-out transitions and transform-based press feedback. Keyboard-heavy command entry remains immediate, while panel state changes and touch feedback are smoother without adding slow decorative motion."
       ]
     },
     {
