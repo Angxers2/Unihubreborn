@@ -1,6 +1,21 @@
 {
-  "version": "2.3.7",
+  "version": "2.3.8",
   "entries": [
+    {
+      "version": "2.3.8",
+      "date": "11 August 2026",
+      "title": "Adaptive aim without the client slowdown",
+      "notes": [
+        "Silent Aim now adapts to the common input path a game actually uses: Mouse hit/target/unit rays, modern Workspace raycasts, legacy ray APIs, and camera screen rays. It redirects the game's original query with its filters and original range intact instead of fabricating a hit result, and its compact Aim status says which route was learned.",
+        "The aim hook now requires the executor's safe native metamethod hook and fails closed when it is unavailable. Inactive and unrelated property reads are rejected before expensive caller checks, fixing the severe Roblox slowdown Silent Aim could cause; live verification in Fling Things and People learned its world-ray path while recent FPS remained around 162.",
+        "Walkspeed keeps the exact requested Humanoid value when a game overwrites it after a state change, round transition, spawn shield, or respawn. It records each new character's own baseline first, avoids redundant writes, and still restores the game's value when the movement feature stops.",
+        "View now follows the player rather than one disposable character model. Their death temporarily returns the camera to your own Humanoid, their next character is attached when ready, your own respawn cannot permanently reset the view, and late work from a dead character cannot steal the camera back.",
+        "Universal Hub now keeps its live module globals in a private executor environment while inheriting executor APIs. Running Infinite Yield after the hub can no longer replace ESP, command, player, notification, or refresh modules and freeze the interface; unloading also refuses to erase a metamethod hook installed later by another script.",
+        "Overview opens automatically only on the first execute in a client. Re-executions and queued arrivals after game teleports continue without covering the game with the welcome screen, while !overview still opens it deliberately and the existing startup opt-out remains available.",
+        "Overview measures the real mobile viewport before drawing instead of shrinking a 430-by-700 desktop card after the fact. Phones and narrow windows use a native-size single column with a bounded internal scroller, preserving readable text and full-size touch targets in portrait.",
+        "Action-bearing modals now close through their dedicated buttons by default. Empty pixels inside a card can no longer fall through its Frame and trigger the full-screen backdrop; explicitly dismissible and buttonless modals also confirm the click was genuinely outside the card before closing."
+      ]
+    },
     {
       "version": "2.3.7",
       "date": "10 August 2026",
