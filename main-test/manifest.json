@@ -1,7 +1,7 @@
 {
   "format": 1,
   "product": "Universal Hub Main",
-  "version": "4.0.0-test.1",
+  "version": "4.0.0",
   "assets": [
     {
       "remote": "fonts/uhub_Manrope-Bold.ttf",

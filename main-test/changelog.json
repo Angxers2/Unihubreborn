@@ -1,13 +1,17 @@
 {
   "product": "Universal Hub Main",
-  "version": "4.0.0-test.1",
+  "version": "4.0.0",
   "channel": "GitHub testing",
   "entries": [
     {
-      "version": "4.0.0-test.1",
+      "version": "4.0.0",
       "date": "12 September 2026",
-      "title": "Universal Hub V4 \u2014 first test build",
+      "title": "Universal Hub V4 \u2014 Friends and expanded native controls",
       "notes": [
+        "A dedicated Friends tab with all Roblox friends, online and playing filters, name search, game artwork, profiles and fresh-presence joining.",
+        "A smaller default window with readable typography, and a rebuilt Players profile with solid card surfaces and scrolling identity and action sections.",
+        "Native Fling controls with player autocomplete, style, duration, standing mode, live status and an always-available Stop action.",
+        "New character tuning, spin, animation speed and freeze, camera zoom and sensitivity, atmosphere, local platform and inventory controls, with scoped restoration.",
         "A new glass interface with inline tools, searchable features, section navigation, themes, and responsive controls.",
         "Player profiles and targeting, movement and visual tools, remembered games, and session utilities.",
         "Script discovery across ScriptBlox, RScripts, and RobloxScripts, with an Auto source, saved scripts, and full listing details.",
