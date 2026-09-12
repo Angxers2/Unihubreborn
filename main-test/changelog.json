@@ -13,7 +13,9 @@
         "Script discovery across ScriptBlox, RScripts, and RobloxScripts, with an Auto source, saved scripts, and full listing details.",
         "Main and Lite chat compatibility, attachment viewing, Spotify, AI, MCP, and diagnostics in the Main interface.",
         "Stable AFK camera with scene-adaptive grading and subject focus; effects are removed when you resume.",
-        "First-install asset downloads, Main-specific changelog, and GitHub test-channel reload and teleport support."
+        "First-install asset downloads, Main-specific changelog, and GitHub test-channel reload and teleport support.",
+        "Asset downloading now shows only the animated Main logo, without progress bars or status text.",
+        "Removed the demonstration thunderstorm alert; the overview shows real weather alerts only."
       ]
     }
   ]

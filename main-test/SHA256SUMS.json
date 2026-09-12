@@ -1,5 +1,5 @@
 {
-  "UniversalHubMain.lua": "3b447149793a3ed1da289dddc9afe0a644e566d907b7160f79e3029d74e23da5",
+  "UniversalHubMain.lua": "4f07b086527d06a771fa1678358b02f197cb353ccfdc7e5a17d9bd6af07fe7bc",
   "assets/JAKARTA-LICENSE": "995c7199cab65954f545996326755daee7b63cc6b42b06c13da1f9502ab08a99",
   "assets/PHOSPHOR-LICENSE": "b5b1f1da112d18ea2147decfd48ddc1bf2b5aeb6c265381579340e95b15a2bb2",
   "assets/fonts/uhub_Manrope-Bold.ttf": "b9584e099e0e7f1e1e914c3037aabb9010c50346a3ce8df5eeeeecc0563044d8",
@@ -249,6 +249,6 @@
   "assets/sounds/uhub_error.mp3": "26dcb1f01ef525cd4813b81da894929ee1dd8abafe12b43f03ed0d0b949d135c",
   "assets/sounds/uhub_startup.mp3": "ef7a111ccc7e476dd127338dda72d1921fed02bda57e455366caf42182d8af2d",
   "assets/sounds/uhub_success.mp3": "e5c72f36a899ae40adced09809c4b966201b3189ddf8edba643ef9319de7218b",
-  "changelog.json": "52ede67aa82256d93eca74425677931ce1e5756c969a178ebb63ac84441d8226",
+  "changelog.json": "6e1f9e32fffcea448823ae4eaa2ea946b5fa1dde1f9fc6e17c5ebb0cd780666c",
   "manifest.json": "dc3d18dfa63074a974e957e87259a08defb6ff6533f194bc87562e1e789ba7a6"
 }
