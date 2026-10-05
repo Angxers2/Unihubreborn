@@ -27,9 +27,11 @@ loopback only, and the MCP side talks to the process that launched it.
 """
 
 import json
+import signal
 import os
 import queue
 import secrets
+import subprocess
 import urllib.error
 import urllib.request
 import sys
@@ -39,7 +41,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 PORT = 8421
 PROTOCOL = "2024-11-05"
-VERSION = "1.6"
+VERSION = "1.7"
 RAW = ("https://raw.githubusercontent.com/Angxers2/Unihubreborn/main/"
        "tools/mcp_bridge.py")
 
@@ -65,6 +67,7 @@ FRESH = 6
 # serve, so it stops rather than sitting there forever. A client that
 # launched us will start us again the next time it needs a tool.
 IDLE_EXIT = 120
+DEAD_AFTER = 4          # consecutive missed health checks before an owner is called dead
 SEEN_HUB = [False]
 STOP = threading.Event()
 # Whoever spoke initialize. Passed on to the hub so it can say "connected to
@@ -74,6 +77,8 @@ CLIENT = [None]
 # Whether this process holds the port. False means another copy does and
 # we forward to it.
 OWNER = [False]
+# No MCP client on stdin: started from a terminal, or the client has gone.
+HEADLESS = [False]
 # serve_stdio and the list_changed notifier both write to stdout, and two
 # interleaved JSON lines are two corrupt messages.
 OUT_LOCK = threading.Lock()
@@ -339,15 +344,62 @@ def notify_list_changed():
     say({"jsonrpc": "2.0", "method": "notifications/tools/list_changed"})
 
 
+def evict_dead_owner() -> bool:
+    """The port is held by a bridge that no longer answers. End that bridge.
+
+    Only ever another copy of this program, recognised by its command line;
+    anything else listening there is not ours to touch. This is what makes a
+    wedged owner survivable: without it, one stuck process -- an older build,
+    a hang nobody predicted -- keeps the hub disconnected until somebody
+    finds it in a process list.
+    """
+    try:
+        pids = subprocess.run(
+            ["lsof", "-nP", "-iTCP:%d" % PORT, "-sTCP:LISTEN", "-t"],
+            capture_output=True, text=True, timeout=5).stdout.split()
+    except (OSError, subprocess.SubprocessError):
+        return False  # no lsof (Windows): take_over still covers a clean exit
+    ended = False
+    for pid in {int(p) for p in pids if p.isdigit()} - {os.getpid()}:
+        try:
+            cmd = subprocess.run(["ps", "-o", "command=", "-p", str(pid)],
+                                 capture_output=True, text=True, timeout=5).stdout
+            if "uhub_mcp" in cmd or "mcp_bridge" in cmd:
+                os.kill(pid, signal.SIGTERM)
+                ended = True
+        except (OSError, subprocess.SubprocessError):
+            continue
+    if ended:
+        print("universal-hub bridge: ended a bridge that held the port "
+              "without answering", file=sys.stderr)
+    return ended
+
+
 def watch_tools():
-    """A proxy has no /poll of its own, so it watches the owner's count."""
-    seen = 0
+    """A proxy has no /poll of its own, so it watches the owner.
+
+    It also stands in for it. An owner that has gone is replaced here within
+    a couple of seconds, rather than on the next tool call -- the hub polls
+    whether or not anybody is calling tools, and should not have to wait for
+    one to find a bridge again.
+    """
+    seen, misses = 0, 0
     while not STOP.wait(1.5):
         if OWNER[0]:
             return  # the owner notifies from /poll, where it learns first
         try:
             n = ask_owner_get("/health", timeout=3).get("tools") or 0
+            misses = 0
         except (urllib.error.URLError, OSError, ValueError):
+            misses += 1
+            if take_over():
+                return
+            # Still bound, still silent, four checks running: it is not
+            # coming back. A busy owner answers /health in milliseconds.
+            if misses >= DEAD_AFTER and evict_dead_owner():
+                time.sleep(0.5)
+                if take_over():
+                    return
             continue
         if n and not seen:
             notify_list_changed()
@@ -373,15 +425,33 @@ def ask_owner_get(path: str, timeout: float = 5):
         return json.loads(r.read())
 
 
+def serve(srv):
+    """Own the hub queue until told to stop, then give the port back.
+
+    shutdown() alone leaves the socket bound. This process can outlive the
+    stop by days -- it is blocked reading a client's stdin -- and a bridge
+    that holds the port without serving it is the one every later bridge
+    finds, forwards to, and gets nothing from: the hub then never connects
+    again until that process is killed by hand.
+    """
+    OWNER[0] = True
+
+    def until_stopped():
+        STOP.wait()
+        srv.shutdown()
+        srv.server_close()
+
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    threading.Thread(target=watchdog, daemon=True).start()
+    threading.Thread(target=until_stopped, daemon=True).start()
+
+
 def take_over() -> bool:
     """The owner has gone. Try to become it rather than staying broken."""
     srv = bind()
     if not srv:
         return False
-    OWNER[0] = True
-    threading.Thread(target=srv.serve_forever, daemon=True).start()
-    threading.Thread(target=watchdog, daemon=True).start()
-    threading.Thread(target=lambda: (STOP.wait(), srv.shutdown()), daemon=True).start()
+    serve(srv)
     print("universal-hub bridge: took the port over from a bridge that left",
           file=sys.stderr)
     return True
@@ -661,7 +731,11 @@ def serve_stdio():
 def watchdog():
     """Stop once the game has been gone a while, having once been here."""
     while not STOP.wait(5):
-        if OWNER[0] and SEEN_HUB[0] and (time.time() - TOOLS_AT) > IDLE_EXIT:
+        # Only a bridge nobody is attached to. One with a client is that
+        # client's MCP server: the game leaving is not a reason to take it
+        # away, and it cannot exit anyway while it is blocked reading stdin.
+        if (OWNER[0] and HEADLESS[0] and SEEN_HUB[0]
+                and (time.time() - TOOLS_AT) > IDLE_EXIT):
             print("universal-hub bridge: hub gone for %ds, stopping" % IDLE_EXIT,
                   file=sys.stderr)
             STOP.set()
@@ -748,11 +822,7 @@ def bind():
 def main():
     srv = bind()
     if srv:
-        OWNER[0] = True
-        threading.Thread(target=srv.serve_forever, daemon=True).start()
-        threading.Thread(target=watchdog, daemon=True).start()
-        threading.Thread(target=lambda: (STOP.wait(), srv.shutdown()),
-                         daemon=True).start()
+        serve(srv)
         # Never print to stdout here -- it is the protocol channel.
         print("universal-hub bridge: %s, MCP on stdio, hub queue on "
               "127.0.0.1:%d" % (VERSION, PORT), file=sys.stderr)
@@ -773,6 +843,7 @@ def main():
         # redirected it means there was never a client at all -- and the
         # hub still needs the queue. Exiting here is what made a bridge
         # started with & or nohup print the banner and die.
+        HEADLESS[0] = True
         if not STOP.is_set():
             print("universal-hub bridge: no MCP client on stdin, serving the "
                   "hub queue only", file=sys.stderr)
